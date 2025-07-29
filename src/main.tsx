@@ -10,7 +10,8 @@ import Dashboard from "./components/UserDashboard/subpages/dashboard";
 import SurveyPage from "./components/UserDashboard/subpages/surveys";
 import TakeSurvey from "./components/UserDashboard/subpages/create-survey";
 import IndexPage from "./components/Dashboard/subpages/index";
-import FormsAndOutcomes from "./components/Dashboard/subpages/forms-and-outcomes"
+import Outcomes from "./components/Dashboard/subpages/forms-and-outcomes"
+import Reports from "./components/Dashboard/subpages/reports"
 
 const router = createBrowserRouter([
   {
@@ -38,7 +39,8 @@ const router = createBrowserRouter([
     element: <AdminDashboard />,
     children: [
       { index: true, element: <IndexPage /> },
-      { path: "forms-and-outcomes", element: <FormsAndOutcomes /> },
+      { path: "forms-and-outcomes", element: <Outcomes /> },
+      { path: "reports", element: <Reports /> },
     ]
   },
 ])

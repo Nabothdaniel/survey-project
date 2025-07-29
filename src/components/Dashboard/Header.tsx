@@ -34,7 +34,6 @@ const Header: React.FC = () => {
             { key: "dashboard", label: "Dashboard", icon: <FiBarChart2 /> },
             { key: "forms", label: "Forms & Outcomes", icon: <FiFileText /> },
             { key: "reports", label: "Reports", icon: <FiBarChart2 /> },
-            { key: "settings", label: "Settings", icon: <FiSettings /> },
           ].map((tab) => (
             <button
               key={tab.key}
