@@ -1,69 +1,62 @@
-# React + TypeScript + Vite
+# 📊 Survey Project
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A full-stack survey management platform designed for creating, distributing, and analyzing surveys.  
+Built with **React + TypeScript + Vite** on the frontend and a hybrid backend powered by **Node.js**, **MongoDB**, and **MySQL**.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## ✨ Features
 
-## Expanding the ESLint configuration
+- 🔐 **User Authentication** — secure login and signup  
+- 📋 **Dynamic Surveys** — create, assign, and complete surveys  
+- 💾 **Persistent State** — responses stored in MongoDB & MySQL  
+- 📊 **Dashboard Analytics** — view progress and completion stats  
+- 🗂️ **Survey Status Tracking** — *New*, *In Progress*, *Completed*  
+- 🎨 **Modern UI** — clean, responsive design using Tailwind CSS  
+- ⚡ **Fast Development** — powered by Vite with Hot Module Reload  
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+---
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 🛠️ Tech Stack
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+### **Frontend**
+- [React](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/)  
+- [Vite](https://vitejs.dev/) — fast dev server & bundler  
+- [Tailwind CSS](https://tailwindcss.com/) — utility-first styling  
+- [React Router](https://reactrouter.com/) — routing system  
+- [Jotai](https://jotai.org/) — state management  
+- [React Icons](https://react-icons.github.io/react-icons/) — icons  
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### **Backend**
+- [Node.js](https://nodejs.org/) + [Express](https://expressjs.com/)  
+- [MongoDB](https://www.mongodb.com/) — stores survey data & responses  
+- [MySQL](https://www.mysql.com/) — handles user authentication & relational data  
+- [Sequelize](https://sequelize.org/) — SQL ORM for MySQL  
+- [Mongoose](https://mongoosejs.com/) — ODM for MongoDB  
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## 📂 Project Structure
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+survey-project/
+│
+├── frontend/ # React + Vite + TS app
+│ ├── src/
+│ │ ├── atoms/ # Jotai state management
+│ │ ├── components/ # Reusable UI components
+│ │ ├── pages/ # App pages (Dashboard, Login, etc.)
+│ │ ├── main.tsx # React entry point
+│ │ └── index.css # Global styles
+│ └── vite.config.ts
+│
+├── backend/ # Express backend
+│ ├── controllers/ # Business logic
+│ ├── models/ # Sequelize & Mongoose models
+│ ├── routes/ # API routes
+│ ├── config/ # DB configurations
+│ └── server.js # Express entry point
+│
+└── README.md
+
+
+
