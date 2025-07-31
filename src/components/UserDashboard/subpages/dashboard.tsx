@@ -2,6 +2,7 @@ import { FiCalendar, FiClipboard, FiClock, FiCheckCircle } from "react-icons/fi"
 import { Link } from "react-router-dom";
 import { useAtom } from "jotai";
 import { surveyData, userSurveysAtom } from "../../../atoms/surveyAtom";
+import Welcome from "../../ui/Welcome";
 
 const Dashboard = () => {
     const [userSurveys] = useAtom(userSurveysAtom);
@@ -39,16 +40,8 @@ const Dashboard = () => {
     return (
         <>
             {/* Welcome Section */}
-            <div className="mb-8 text-center sm:text-left">
-                <div className="flex justify-center sm:justify-start items-center text-sm text-gray-500 mb-2">
-                    <FiCalendar className="mr-2" />
-                    WED, 29TH, 2025
-                </div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                    Hi, User. Welcome back...
-                </h1>
-            </div>
 
+            <Welcome />
             {/* Survey Dashboard */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 {/* Statistics Cards */}
@@ -135,11 +128,10 @@ const Dashboard = () => {
                                             </div>
                                             <Link
                                                 to={`/take-survey/${survey.id}`}
-                                                className={`px-4 py-2 text-sm text-center font-medium rounded-lg whitespace-nowrap ${
-                                                    status === "completed"
+                                                className={`px-4 py-2 text-sm text-center font-medium rounded-lg whitespace-nowrap ${status === "completed"
                                                         ? "bg-gray-100 text-gray-700 cursor-not-allowed pointer-events-none"
                                                         : "bg-blue-600 text-white hover:bg-blue-700"
-                                                }`}
+                                                    }`}
                                             >
                                                 {status === "new" && "Start Survey"}
                                                 {status === "in_progress" && "Continue"}

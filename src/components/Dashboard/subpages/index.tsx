@@ -1,14 +1,17 @@
-import Welcome from "../../../components/Dashboard/Welcome";
+import Welcome from "../../ui/Welcome";
 import FormSection from "../../../components/Dashboard/FormSection";
+import DraftsSection from "../../../components/Dashboard/DraftsSection";
 
 const IndexPage = () => {
   return (
     <div>
-         {/* Welcome */}
-        <Welcome />
+      {/* Welcome */}
+      <Welcome />
 
-        {/* Form Creator */}
-        <FormSection />
+      {/* Form Creator */}
+      <FormSection />
+      {/* Drafts Section */}
+      <DraftsSection />
     </div>
   )
 }

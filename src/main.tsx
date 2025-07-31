@@ -10,8 +10,9 @@ import Dashboard from "./components/UserDashboard/subpages/dashboard";
 import SurveyPage from "./components/UserDashboard/subpages/surveys";
 import TakeSurvey from "./components/UserDashboard/subpages/create-survey";
 import IndexPage from "./components/Dashboard/subpages/index";
-import Outcomes from "./components/Dashboard/subpages/forms-and-outcomes"
-import Reports from "./components/Dashboard/subpages/reports"
+import Outcomes from "./components/Dashboard/subpages/forms-and-outcomes";
+import Reports from "./components/Dashboard/subpages/reports";
+import PreviewPage from "./components/Dashboard/subpages/PreviewPage";
 
 const router = createBrowserRouter([
   {
@@ -41,6 +42,7 @@ const router = createBrowserRouter([
       { index: true, element: <IndexPage /> },
       { path: "forms-and-outcomes", element: <Outcomes /> },
       { path: "reports", element: <Reports /> },
+      { path: "preview", element: <PreviewPage /> },
     ]
   },
 ])

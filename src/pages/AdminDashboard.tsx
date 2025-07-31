@@ -17,7 +17,7 @@ const SurveyForm: React.FC = () => {
       <Header />
 
       {/* Main Content */}
-      <main className="px-4 sm:px-6 py-8 ">
+      <main className="px-4 sm:px-6 pt-20 pb-10">
         <Outlet />
       </main>
     </div>

@@ -65,7 +65,7 @@ const SurveyPage: React.FC = () => {
     }
 
     return (
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+        <div className=" py-8">
             {!survey ? (
                 <div className="bg-white rounded-lg shadow border border-gray-200">
                     <div className="px-4 sm:px-6 py-4 border-b border-gray-200">

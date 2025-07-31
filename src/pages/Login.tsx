@@ -26,8 +26,8 @@ const LoginForm = () => {
     route("/signup");
   };
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-6">
-      <div ref={formRef} className="max-w-md w-full bg-white p-10 rounded-xl shadow-xl space-y-8">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-3">
+      <div ref={formRef} className="max-w-md w-full bg-white px-5 py-10 rounded-xl shadow-xl space-y-8">
         <div className="text-center">
           <div className="flex justify-center">
             <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center">

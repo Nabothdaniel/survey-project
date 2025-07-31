@@ -17,8 +17,8 @@ const SignupForm: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-6">
-            <div className="max-w-md w-full space-y-8 bg-white  rounded-lg p-10  shadow-xl">
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-3">
+            <div className="max-w-md w-full space-y-8 bg-white  rounded-lg px-5 py-10  shadow-xl">
                 <div className="text-center">
                     <div className="flex justify-center">
                         <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center">
@@ -34,7 +34,7 @@ const SignupForm: React.FC = () => {
                 </div>
 
                 <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-                    <div className="rounded-md shadow-sm space-y-4">
+                    <div className=" space-y-4">
                         <input
                             type="text"
                             required
