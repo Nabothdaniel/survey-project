@@ -105,7 +105,7 @@ const FormSection = () => {
     formTitle:string;
     formDescription:string;
     questions:any[];
-    status:string;
+    status: "draft" | "preview" | "published";
   }
   
 
