@@ -5,7 +5,7 @@ export type SurveyStatus = "new" | "in_progress" | "completed";
 import type { Survey } from "../types";
 
 export interface UserSurveyState {
-  [surveyId: number]: {
+  [surveyId: number | string]: {
     status: SurveyStatus;
     answers: { [questionId: number]: string };
   };

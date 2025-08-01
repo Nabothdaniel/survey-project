@@ -2,6 +2,7 @@ import { useAtom } from "jotai";
 import { surveyAtom } from "../../../atoms/adminSurveyAtom";
 import { FiCheckSquare } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
+import type { SurveyQuestion } from "../../../types";
 
 const PreviewPage = () => {
   const [survey] = useAtom(surveyAtom);
@@ -29,7 +30,7 @@ const PreviewPage = () => {
       <p className="text-gray-600 mb-6">{survey.formDescription}</p>
 
       <form className="space-y-6">
-        {survey.questions.map((q: any, index: number) => (
+        {survey.questions.map((q: SurveyQuestion, index: number) => (
           <div
             key={q.id}
             className="border border-gray-200 rounded-lg p-4 bg-gray-50"
