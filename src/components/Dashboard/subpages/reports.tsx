@@ -6,13 +6,12 @@ import {
   Bar,
   XAxis,
   YAxis,
-  CartesianGrid,
   Tooltip,
   ResponsiveContainer,
   PieChart,
   Pie,
   Cell,
-  Legend,
+  LabelList,
 } from "recharts";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
@@ -33,7 +32,7 @@ const Reports = () => {
     Completed: userSurveys[s.id]?.status === "completed" ? 1 : 0,
     "In Progress": userSurveys[s.id]?.status === "in_progress" ? 1 : 0,
     New: !userSurveys[s.id] ? 1 : 0,
-  })); 
+  }));
 
   const pieData = [
     { name: "Completed", value: completed },
@@ -41,7 +40,7 @@ const Reports = () => {
     { name: "New", value: newSurveys },
   ];
 
-  // Prepare Table Data
+  // Table Data
   const tableData = surveyData.flatMap((survey) => {
     const answers = userSurveys[survey.id]?.answers || {};
     return survey.questions.map((q) => ({
@@ -74,61 +73,77 @@ const Reports = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
+      {/* Header */}
       <h1 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
         <FiBarChart2 /> Survey Reports
       </h1>
 
       {/* Top Summary */}
       <div className="grid sm:grid-cols-3 gap-6 mb-10">
-        <div className="bg-white p-6 rounded-lg shadow border text-center">
-          <h3 className="text-sm text-gray-500">Total Surveys</h3>
-          <p className="text-3xl font-bold text-blue-600">{total}</p>
-        </div>
-        <div className="bg-white p-6 rounded-lg shadow border text-center">
-          <h3 className="text-sm text-gray-500">Completed</h3>
-          <p className="text-3xl font-bold text-green-600">{completed}</p>
-        </div>
-        <div className="bg-white p-6 rounded-lg shadow border text-center">
-          <h3 className="text-sm text-gray-500">In Progress</h3>
-          <p className="text-3xl font-bold text-yellow-600">{inProgress}</p>
-        </div>
+        {[
+          { label: "Total Surveys", value: total, color: "text-blue-600" },
+          { label: "Completed", value: completed, color: "text-green-600" },
+          { label: "In Progress", value: inProgress, color: "text-yellow-600" },
+        ].map((stat, i) => (
+          <div
+            key={i}
+            className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 text-center"
+          >
+            <h3 className="text-sm text-gray-500">{stat.label}</h3>
+            <p className={`text-3xl font-bold ${stat.color}`}>{stat.value}</p>
+          </div>
+        ))}
       </div>
 
       {/* Charts */}
       <div className="grid lg:grid-cols-2 gap-8 mb-12">
-        <div className="bg-white p-6 rounded-lg shadow border">
+        {/* Bar Chart */}
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
           <h2 className="text-lg font-semibold mb-4">Survey Completion by Type</h2>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={barData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis allowDecimals={false} />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey="Completed" fill="#22C55E" />
-              <Bar dataKey="In Progress" fill="#FACC15" />
-              <Bar dataKey="New" fill="#3B82F6" />
+              <XAxis dataKey="name" tick={{ fill: "#4B5563", fontSize: 12 }} />
+              <YAxis hide />
+              <Tooltip cursor={{ fill: "transparent" }} />
+              <Bar dataKey="Completed" fill="#22C55E">
+                <LabelList dataKey="Completed" position="top" />
+              </Bar>
+              <Bar dataKey="In Progress" fill="#FACC15">
+                <LabelList dataKey="In Progress" position="top" />
+              </Bar>
+              <Bar dataKey="New" fill="#3B82F6">
+                <LabelList dataKey="New" position="top" />
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow border">
+
+        {/* Pie Chart */}
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
           <h2 className="text-lg font-semibold mb-4">Overall Survey Status</h2>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
-              <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={110} label>
+              <Pie
+                data={pieData}
+                dataKey="value"
+                nameKey="name"
+                cx="50%"
+                cy="50%"
+                outerRadius={110}
+                label={({ name, value }) => `${name}: ${value}`}
+              >
                 {pieData.map((_, i) => (
                   <Cell key={i} fill={COLORS[i % COLORS.length]} />
                 ))}
               </Pie>
               <Tooltip />
-              <Legend />
             </PieChart>
           </ResponsiveContainer>
         </div>
       </div>
 
       {/* Responses Table */}
-      <div className="bg-white p-6 rounded-lg shadow border">
+      <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold text-gray-800">Survey Responses</h2>
           <div className="flex gap-3">
@@ -149,12 +164,16 @@ const Reports = () => {
 
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200 text-sm">
-            <thead className="bg-gray-100">
+            <thead className="bg-gray-50">
               <tr>
-                <th className="px-4 py-2 text-left font-medium text-gray-700">Survey</th>
-                <th className="px-4 py-2 text-left font-medium text-gray-700">Question</th>
-                <th className="px-4 py-2 text-left font-medium text-gray-700">Answer</th>
-                <th className="px-4 py-2 text-left font-medium text-gray-700">Status</th>
+                {["Survey", "Question", "Answer", "Status"].map((header, idx) => (
+                  <th
+                    key={idx}
+                    className="px-4 py-2 text-left font-medium text-gray-700"
+                  >
+                    {header}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
