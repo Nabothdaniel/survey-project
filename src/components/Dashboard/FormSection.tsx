@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useAtom } from "jotai";
 import { useNavigate } from "react-router-dom";
 import { surveyAtom,draftsAtom } from "../../atoms/adminSurveyAtom";
-import type { Survey, SurveyQuestion } from "../../types";
+import type { SurveyQuestion } from "../../types";
 import { nanoid } from "nanoid"; 
 
 import {
@@ -43,7 +43,7 @@ const FormSection = () => {
     setQuestionCounter(questionCounter + 1);
   };
 
-  const updateQuestion = (id: number, field: keyof SurveyQuestion, value: any) => {
+  const updateQuestion = (id: number, field: keyof SurveyQuestion, value: number | string | boolean) => {
     setSurvey({
       ...survey,
       questions: survey.questions.map((q) =>
@@ -119,7 +119,7 @@ const FormSection = () => {
  
 
  const handleSaveDraft = () => {
-  let draftId = survey.id || nanoid(6);
+  const draftId = survey.id || nanoid(6);
 
   // Save the draft
   const updatedDrafts = drafts.filter((d) => d.id !== draftId);

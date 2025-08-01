@@ -33,7 +33,7 @@ const Reports = () => {
     Completed: userSurveys[s.id]?.status === "completed" ? 1 : 0,
     "In Progress": userSurveys[s.id]?.status === "in_progress" ? 1 : 0,
     New: !userSurveys[s.id] ? 1 : 0,
-  }));
+  })); 
 
   const pieData = [
     { name: "Completed", value: completed },

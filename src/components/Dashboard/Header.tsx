@@ -4,8 +4,6 @@ import {
   FiBarChart2,
   FiFileText,
   FiSettings,
-  FiHelpCircle,
-  FiPlus,
   FiChevronDown,
   FiMenu,
   FiX,
