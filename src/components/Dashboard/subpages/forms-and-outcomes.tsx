@@ -36,7 +36,9 @@ const Outcomes: React.FC = () => {
     }
   ]);
 
-  const [responses] = useState([
+  const [responses] = useState<
+  { id: number; formId: number; data: Record<string, string> }[]
+>([
     { id: 1, formId: 1, data: { Rating: '5 stars', Comments: 'Excellent service!' } },
     { id: 2, formId: 1, data: { Rating: '4 stars', Comments: 'Good, delivery was fast.' } },
     { id: 3, formId: 2, data: { 'Interest Level': 'High' } },
@@ -62,10 +64,12 @@ const Outcomes: React.FC = () => {
     const total = formResponses.length;
     const counts: { [key: string]: number } = {};
 
-    formResponses.forEach(res => {
-      const val = res.data[field];
-      if (val) counts[val] = (counts[val] || 0) + 1;
-    });
+  formResponses.forEach((res) => {
+  const val = (res.data as Record<string, string>)[field];
+  if (val) {
+    counts[val] = (counts[val] || 0) + 1;
+  }
+});
 
     return Object.entries(counts).map(([option, count]) => ({
       option,
