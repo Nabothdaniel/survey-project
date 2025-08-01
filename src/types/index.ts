@@ -12,7 +12,7 @@ export interface UserDashboardProps {
 }
 
 export interface Survey {
-  id: number | string;
+  id: number;
   title: string;
   description: string;
   dueDate: string;
