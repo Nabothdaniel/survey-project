@@ -3,7 +3,7 @@ const router = express.Router();
 
 
 import { authenticateToken } from '../middleware/authenticateMiddlware.js';
-import { registerUser, loginUser, userProfile, deleteUser, logoutUser,updatePassword, } from '../controller/authController.js'
+import { registerUser, loginUser, userProfile, deleteUser, logoutUser,updatePassword,getAllSurveys } from '../controller/authController.js'
 
 
 
@@ -13,6 +13,6 @@ router.get('/profile', authenticateToken, userProfile);
 router.delete('/delete', authenticateToken, deleteUser);
 router.post('/logout', authenticateToken, logoutUser);
 router.post('/reset-password',updatePassword);
-
+router.get('/surveys', authenticateToken, getAllSurveys);
 
 export const authRoute = router;

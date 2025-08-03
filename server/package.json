@@ -5,9 +5,9 @@
   "main": "server.js",
   "type": "module",
   "scripts": {
-    "start": "npx nodemon server.js",
-    "dev": "nodemon server.js",
-    "test": "echo \"Error: no tests specified\" && exit 1"
+    "start": "npx nodemon --trace-warnings server.js",
+    "dev": "nodemon --trace-warnings server.js",
+    "test": "node --trace-warnings server.js"
   },
   "keywords": [
     "express",

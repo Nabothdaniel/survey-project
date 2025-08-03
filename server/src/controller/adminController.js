@@ -1,13 +1,13 @@
 
 
 import bcrypt from 'bcrypt';
-import User from '../models/User.js';
-import Survey from "../models/Survey.js";
-import Question from "../models/Question.js";
+
 import { generateToken } from '../utils/helperfns.js';
 import sequelize from '../utils/database.js';
 
+import models from "../models/index.js";
 
+const { User, Survey, Question,Response } = models;
 
 const signupAdmin = async (req, res) => {
   const { name, email, password } = req.body;
@@ -70,7 +70,7 @@ const signupAdmin = async (req, res) => {
 
 
 
- const createSurvey = async (req, res) => {
+const createSurvey = async (req, res) => {
   const t = await sequelize.transaction();
   try {
     const { title, description, questions } = req.body;
@@ -115,7 +115,31 @@ const signupAdmin = async (req, res) => {
   }
 };
 
- const deleteSurvey = async (req, res) => {
+
+
+const getAdminSurveys = async (req, res) => {
+  try {
+    const userId = req.user.id;  // comes from auth middleware
+
+    const surveys = await Survey.findAll({
+      where: { createdBy: userId },
+      include: [
+        {
+          model: Question,
+          as: "questions",
+        },
+      ],
+      order: [["createdAt", "DESC"]],
+    });
+
+    res.status(200).json({ success: true, surveys });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: "Failed to fetch admin surveys" });
+  }
+};
+
+const deleteSurvey = async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.user.id;
@@ -143,11 +167,168 @@ const signupAdmin = async (req, res) => {
   }
 };
 
+const getSurveyOutcomes = async (req, res) => {
+  try {
+    const { surveyId } = req.params;
+
+    const survey = await Survey.findByPk(surveyId, {
+      include: [
+        {
+          model: User,
+          as: "creator",
+          attributes: ["id", "name", "email"]
+        },
+        {
+          model: Question,
+          as: "questions",
+          include: [
+            {
+              model: Response,
+              as: "responses",
+              include: [
+                {
+                  model: User,
+                  as: "respondent",
+                  attributes: ["id", "name", "email"]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    });
+
+    if (!survey) {
+      return res.status(404).json({ success: false, message: "Survey not found" });
+    }
+
+    // 1️⃣ Calculate total responses across all questions
+    const totalSurveyResponses = survey.questions.reduce(
+      (sum, q) => sum + q.responses.length,
+      0
+    );
+
+    // 2️⃣ Calculate outcomes with global percentages
+    const outcomeData = survey.questions.map(question => {
+      const totalResponses = question.responses.length;
+      const answerCount = {};
+
+      question.responses.forEach(r => {
+        const ans = r.answer?.toLowerCase() || "no answer";
+        answerCount[ans] = (answerCount[ans] || 0) + 1;
+      });
+
+      const percentages = Object.keys(answerCount).map(ans => ({
+        answer: ans,
+        count: answerCount[ans],
+        // percentage relative to total survey responses
+        percentage: ((answerCount[ans] / totalSurveyResponses) * 100).toFixed(2)
+      }));
+
+      return {
+        questionId: question.id,
+        question: question.text,
+        totalResponses,
+        outcomes: percentages
+      };
+    });
+
+    res.status(200).json({
+      success: true,
+      survey: {
+        id: survey.id,
+        title: survey.title,
+        description: survey.description,
+        createdBy: {
+          id: survey.creator.id,
+          name: survey.creator.name,
+          email: survey.creator.email
+        }
+      },
+      totalSurveyResponses,
+      outcomes: outcomeData
+    });
+
+  } catch (err) {
+    console.error("DEBUG ERROR getSurveyOutcomes:", err);
+    res.status(500).json({ success: false, message: "Failed to fetch survey outcomes" });
+  }
+};
+
+
+const updateSurvey = async (req, res) => {
+  const t = await Survey.sequelize.transaction();
+  try {
+    const { surveyId } = req.params;
+    const { title, description, questions } = req.body;
+    const adminId = req.user.id;
+
+    // Check if survey exists & belongs to the admin
+    const survey = await Survey.findOne({
+      where: { id: surveyId, createdBy: adminId },
+      include: [{ model: Question, as: "questions" }]
+    });
+
+    if (!survey) {
+      return res.status(404).json({ success: false, message: "Survey not found or not authorized" });
+    }
+
+    // Update survey if fields are provided
+    if (title) survey.title = title;
+    if (description) survey.description = description;
+    await survey.save({ transaction: t });
+
+    // Handle questions updates
+    if (Array.isArray(questions)) {
+      for (const q of questions) {
+        if (q.id) {
+          // Update existing question
+          await Question.update(
+            {
+              text: q.text,
+              type: q.type,
+              options: q.options || null
+            },
+            { where: { id: q.id, surveyId: survey.id }, transaction: t }
+          );
+        } else {
+          // Add new question
+          await Question.create(
+            {
+              text: q.text,
+              type: q.type,
+              options: q.options || null,
+              surveyId: survey.id
+            },
+            { transaction: t }
+          );
+        }
+      }
+    }
+
+    await t.commit();
+
+    // Return updated survey with its questions
+    const updatedSurvey = await Survey.findByPk(survey.id, {
+      include: [{ model: Question, as: "questions" }]
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Survey updated successfully",
+      survey: updatedSurvey
+    });
+
+  } catch (err) {
+    if (!t.finished) await t.rollback();
+    console.error(err);
+    res.status(500).json({ success: false, message: "Failed to update survey" });
+  }
+};
 
 
 
 
 
 
-
-export { signupAdmin, createSurvey,deleteSurvey };
+export { signupAdmin, createSurvey, getAdminSurveys, deleteSurvey, getSurveyOutcomes, updateSurvey };

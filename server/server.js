@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from "dotenv"
 import { authRoute } from './src/routes/auth.js'
 import { adminrouter } from './src/routes/adminRoutes.js'
+import { responseRouter } from "./src/routes/responseRoutes.js";
 import sequelize from "./src/utils/database.js";
 
 import './src/models/index.js';
@@ -13,6 +14,8 @@ dotenv.config();
 
 const app = express()
 const PORT = process.env.PORT || 8000
+
+
 
 
 // Middleware
@@ -44,6 +47,7 @@ sequelize.authenticate()
 //routes
 app.use('/api/v1/auth', authRoute)
 app.use('/api/v1/admin', adminrouter);
+app.use('/api/v1/response', responseRouter);
 
 
 app.use('/',(req,res)=>{

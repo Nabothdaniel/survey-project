@@ -1,6 +1,8 @@
 import bcrypt from 'bcrypt';
 import { generateToken } from '../utils/helperfns.js';
 import User from '../models/User.js';
+import Survey from "../models/Survey.js";
+import Question from "../models/Question.js";
 
 const registerUser = async (req, res) => {
   try {
@@ -151,11 +153,39 @@ const updatePassword = async (req, res) => {
   res.json({ message: "Reset code sent to email." });
 };
 
+
+
+ const getAllSurveys = async (req, res) => {
+  try {
+    const surveys = await Survey.findAll({
+      include: [
+        {
+          model: Question,
+          as: "questions",
+        },
+        {
+          model: User,
+          as: "creator",
+          attributes: ["id", "name", "email"], 
+        },
+      ],
+      order: [["createdAt", "DESC"]],
+    });
+
+    res.status(200).json({ success: true, surveys });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: "Failed to fetch surveys" });
+  }
+};
+
+
 export {
   registerUser,
   loginUser,
   userProfile,
   deleteUser,
+  getAllSurveys,
   logoutUser,
   updatePassword,
 };
