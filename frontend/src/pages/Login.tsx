@@ -1,10 +1,15 @@
 import React, { useState, useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { useNavigate } from "react-router-dom";
+import { useAtom } from 'jotai'
+import { loginAtom } from "../atoms/authAtom";
+import { toast } from 'react-toastify'
 
 const LoginForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [, login] = useAtom(loginAtom)
   const formRef = useRef<HTMLDivElement>(null);
 
   const route = useNavigate();
@@ -17,9 +22,18 @@ const LoginForm = () => {
     );
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Login submitted:", { email, password });
+    setLoading(true);
+    try {
+      await login({ email, password });
+      toast.success("Login successful! Redirecting....");
+      setTimeout(()=> route("/dashboard"),3000)
+    } catch (err: any) {
+      toast.error(err.error || "Invalid email or password");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const switchToSignup = () => {
@@ -55,13 +69,17 @@ const LoginForm = () => {
             onChange={(e) => setPassword(e.target.value)}
             className="w-full border rounded-lg p-3 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
           />
-          <button type="submit" className="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-            Sign in
+          <button type="submit" disabled={loading} className="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+            {loading ? (
+              <div className="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
+            ) : (
+              "Sign Up"
+            )}
           </button>
         </form>
 
         <div className="text-center mt-4">
-          <button onClick={switchToSignup} className="text-blue-600 hover:text-blue-500">
+          <button onClick={switchToSignup}  className="text-blue-600 hover:text-blue-500">
             Don’t have an account? Sign up
           </button>
         </div>

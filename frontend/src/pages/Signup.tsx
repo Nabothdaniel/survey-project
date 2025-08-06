@@ -1,16 +1,31 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { signupAtom } from "../atoms/authAtom";
+import { useAtom } from "jotai";
 
 const SignupForm: React.FC = () => {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [, signup] = useAtom(signupAtom);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
     const route = useNavigate();
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        console.log(name, email, password);
+        setLoading(true);
+        setError("");
+        try {
+            await signup({ name, email, password });
+            route("/login");
+        } catch (err: any) {
+            setError(err.error || "Signup failed");
+        } finally {
+            setLoading(false);
+        }
     };
+
 
     const switchToLogin = () => {
         route("/");
@@ -25,6 +40,7 @@ const SignupForm: React.FC = () => {
                             <span className="text-white font-bold text-xl">S</span>
                         </div>
                     </div>
+                    <p className="my-3 text-red-500">{error}</p>
                     <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
                         Create your account
                     </h2>
@@ -63,9 +79,14 @@ const SignupForm: React.FC = () => {
 
                     <button
                         type="submit"
+                        disabled={loading}
                         className="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                     >
-                        Sign up
+                        {loading ? (
+                            <div className="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                            "Sign Up"
+                        )}
                     </button>
                 </form>
 
