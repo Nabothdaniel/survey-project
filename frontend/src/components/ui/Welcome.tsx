@@ -3,6 +3,7 @@ import { FiCalendar } from "react-icons/fi";
 import { gsap } from "gsap";
 import useProfile from "../../hooks/useProfile";
 
+
 const Welcome = () => {
   const textRef = useRef<HTMLHeadingElement>(null);
   const starsRef = useRef<HTMLDivElement>(null);
