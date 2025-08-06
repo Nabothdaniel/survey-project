@@ -29,7 +29,7 @@ app.use(
 app.use(express.urlencoded({ extended: true }));
 
 app.use(cors({
-  origin: ["http://localhost:5173",], 
+  origin: ["http://localhost:5173","https://survey-project-tau.vercel.app"], 
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], 
   allowedHeaders: ["Content-Type", "Authorization"], 
