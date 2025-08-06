@@ -101,7 +101,7 @@ const Reports = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 grid lg:grid-cols-[18rem_1fr] gap-6">
       {/* Sidebar */}
-      <div className="hidden lg:block relative">
+      <div className=" relative">
         <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-4 h-fit sticky top-24">
           <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
             <FiBarChart2 className="mr-2" /> Surveys

@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useAtom } from "jotai";
 import { useNavigate } from "react-router-dom";
-import { surveyAtom,draftsAtom } from "../../atoms/adminSurveyAtom";
+import { surveyAtom, draftsAtom } from "../../atoms/adminSurveyAtom";
 import type { SurveyQuestion } from "../../types";
-import { nanoid } from "nanoid"; 
+import { nanoid } from "nanoid";
+import Alert from "../ui/Alert";
 
 import {
   FiEdit,
@@ -20,6 +21,7 @@ import {
 const FormSection = () => {
   const [survey, setSurvey] = useAtom(surveyAtom);
   const [drafts, setDrafts] = useAtom(draftsAtom);
+  const [alert, setAlert] = useState<{ type: "success" | "error" | "info", message: string } | null>(null);
   const [questionCounter, setQuestionCounter] = useState(
     survey.questions.length + 1
   );
@@ -76,11 +78,11 @@ const FormSection = () => {
       questions: survey.questions.map((q) =>
         q.id === questionId && q.options
           ? {
-              ...q,
-              options: q.options.map((opt, idx) =>
-                idx === optionIndex ? value : opt
-              ),
-            }
+            ...q,
+            options: q.options.map((opt, idx) =>
+              idx === optionIndex ? value : opt
+            ),
+          }
           : q
       ),
     });
@@ -92,44 +94,48 @@ const FormSection = () => {
       questions: survey.questions.map((q) =>
         q.id === questionId && q.options
           ? {
-              ...q,
-              options: q.options.filter((_, idx) => idx !== optionIndex),
-            }
+            ...q,
+            options: q.options.filter((_, idx) => idx !== optionIndex),
+          }
           : q
       ),
     });
   };
 
-  type defaultSurveyType ={
-    id:string;
-    formTitle:string;
-    formDescription:string;
-    questions:any[];
+  type defaultSurveyType = {
+    id: string;
+    formTitle: string;
+    formDescription: string;
+    questions: any[];
     status: "draft" | "preview" | "published";
   }
-  
+
 
   const defaultSurvey: defaultSurveyType = {
-  id: "",
-  formTitle: "",
-  formDescription: "",
-  questions: [],
-  status: "draft",
-};
- 
+    id: "",
+    formTitle: "",
+    formDescription: "",
+    questions: [],
+    status: "draft",
+  };
 
- const handleSaveDraft = () => {
-  const draftId = survey.id || nanoid(6);
 
-  // Save the draft
-  const updatedDrafts = drafts.filter((d) => d.id !== draftId);
-  setDrafts([...updatedDrafts, { ...survey, id: draftId, status: "draft" }]);
+  const handleSaveDraft = () => {
+    if (!survey.formTitle.trim() && !survey.formDescription.trim() && survey.questions.length === 0) {
+      setAlert({ type: "error", message: "Cannot save. Your form is empty." });
+      return;
+    }
 
-  // Reset the form
-  setSurvey(defaultSurvey);
+    const draftId = survey.id || nanoid(6);
+    const updatedDrafts = drafts.filter((d) => d.id !== draftId);
+    setDrafts([...updatedDrafts, { ...survey, id: draftId, status: "draft" }]);
 
-  alert("Draft saved! Your form has been cleared.");
-};
+    setSurvey(defaultSurvey);
+
+    setAlert({ type: "success", message: "Draft saved! Your form has been cleared." });
+  };
+
+
 
   const handlePreview = () => {
     setSurvey({ ...survey, status: "preview" });
@@ -143,6 +149,14 @@ const FormSection = () => {
 
   return (
     <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-sm border border-gray-200 p-6 sm:p-8">
+      {alert && (
+        <Alert
+          type={alert.type}
+          message={alert.message}
+          onClose={() => setAlert(null)}
+          duration={4000} // auto close after 4s
+        />
+      )}
       {/* Form Basic Info */}
       <div className="flex items-center gap-3 mb-6">
         <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
