@@ -6,6 +6,7 @@ import UserDashboard from "./pages/UserDashboard"
 import "./index.css"
 import LoginForm from "./pages/Login"
 import SignupForm from "./pages/Signup"
+import AdminSignup from "./pages/AdminSignup"
 import Dashboard from "./components/UserDashboard/subpages/dashboard";
 import SurveyPage from "./components/UserDashboard/subpages/surveys";
 import TakeSurvey from "./components/UserDashboard/subpages/create-survey";
@@ -17,11 +18,15 @@ import PreviewPage from "./components/Dashboard/subpages/PreviewPage";
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <LoginForm/>
+    element: <LoginForm />
   },
   {
     path: "/signup",
     element: <SignupForm />
+  },
+  {
+    path: '/signup-admin',
+    element: <AdminSignup />
   },
   {
     path: "/dashboard",
@@ -32,7 +37,7 @@ const router = createBrowserRouter([
     ]
   },
   {
-    path: "/take-survey/:id", 
+    path: "/take-survey/:id",
     element: <TakeSurvey />
   },
   {

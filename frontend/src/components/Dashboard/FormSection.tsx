@@ -144,7 +144,8 @@ const FormSection = () => {
 
   const handlePublish = () => {
     setSurvey({ ...survey, status: "published" });
-    navigate("/admin/forms-and-outcomes");
+    setAlert({ type: "success", message: "Survey created! redirecting...." });
+    setTimeout(() => { navigate("/admin/forms-and-outcomes"); }, 3000);
   };
 
   return (

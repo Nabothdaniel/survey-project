@@ -1,7 +1,7 @@
 {
-  "name": "bamzzy-media",
+  "name": "survey backend",
   "version": "1.0.0",
-  "description": "An account marketplace platform with user authentication and transaction handling",
+  "description": "Create surveys with ease ",
   "main": "server.js",
   "type": "module",
   "scripts": {
