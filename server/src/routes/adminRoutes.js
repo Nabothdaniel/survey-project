@@ -7,7 +7,7 @@ import { authenticateToken } from '../middleware/authenticateMiddlware.js';
 import { isAdmin } from '../middleware/isAdminMiddleware.js';
 
 
-router.post('/create-admin', authenticateToken, isAdmin, signupAdmin);
+router.post('/create-admin', signupAdmin);
 router.post('/create-survey', authenticateToken, isAdmin, createSurvey);
 router.get('/get-survey', authenticateToken, isAdmin, getAdminSurveys);
 router.get( "/get-survey-outcomes/:surveyId",  authenticateToken,  isAdmin, getSurveyOutcomes);

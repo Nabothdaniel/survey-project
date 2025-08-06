@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   FiBarChart2,
   FiFileText,
@@ -9,17 +9,32 @@ import {
   FiX,
   FiLogOut,
 } from "react-icons/fi";
+import { useAtom } from "jotai";
+import { profileAtom } from "../../atoms/profileAtom";
+import { logoutAtom } from "../../atoms/authAtom";
+import { toast } from "react-toastify";
 
 const Header: React.FC = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
 
+  const [profile] = useAtom(profileAtom);
+  const [, logout] = useAtom(logoutAtom);
+  const navigate = useNavigate();
+
   const navLinks = [
     { key: "dashboard", label: "Dashboard", icon: <FiBarChart2 />, path: "/admin" },
     { key: "forms", label: "Forms & Outcomes", icon: <FiFileText />, path: "/admin/forms-and-outcomes" },
     { key: "reports", label: "Reports", icon: <FiBarChart2 />, path: "/admin/reports" },
   ];
+
+  const firstLetter = profile?.name ? profile.name.charAt(0).toUpperCase() : "A";
+  const handleLogout = async () => {
+    await logout();
+    toast.success('logging out....')
+    setTimeout(()=> navigate("/", { replace: true }),1500)
+  };
 
   return (
     <header className="fixed top-0 left-0 w-full bg-white border-b border-gray-200 px-4 sm:px-6 py-4 z-50">
@@ -39,10 +54,11 @@ const Header: React.FC = () => {
               key={tab.key}
               to={tab.path}
               onClick={() => setActiveTab(tab.key)}
-              className={`flex items-center gap-1 ${activeTab === tab.key
-                ? "text-blue-600 border-b-2 border-blue-600"
-                : "text-gray-600 hover:text-gray-900"
-                }`}
+              className={`flex items-center gap-1 ${
+                activeTab === tab.key
+                  ? "text-blue-600 border-b-2 border-blue-600"
+                  : "text-gray-600 hover:text-gray-900"
+              }`}
             >
               {tab.icon} {tab.label}
             </Link>
@@ -51,8 +67,6 @@ const Header: React.FC = () => {
 
         {/* Right Side */}
         <div className="flex items-center gap-3">
-
-
           {/* Profile Dropdown */}
           <div className="relative">
             <button
@@ -60,26 +74,31 @@ const Header: React.FC = () => {
               className="flex items-center gap-2"
             >
               <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                <span className="text-white text-sm font-medium">A</span>
+                <span className="text-white text-sm font-medium">{firstLetter}</span>
               </div>
               <span className="hidden sm:block text-sm font-medium text-gray-700">
-                Admin User
+                {profile?.name || "Admin User"}
               </span>
               <FiChevronDown
-                className={`text-gray-400 text-xs transition-transform ${profileOpen ? "rotate-180" : ""
-                  }`}
+                className={`text-gray-400 text-xs transition-transform ${
+                  profileOpen ? "rotate-180" : ""
+                }`}
               />
             </button>
 
             {/* Dropdown */}
             {profileOpen && (
-              <div className="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50 animate-slide-down">
-                <Link
-                  to="/logout"
-                  className="w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+              <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-3 z-50">
+                <div className="px-4 pb-3 border-b border-gray-200">
+                  <p className="text-sm font-medium text-gray-900">{profile?.name || "Admin User"}</p>
+                  <p className="text-xs text-gray-500">{profile?.email || "admin@example.com"}</p>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="w-full px-4 py-2 text-sm text-red-600 hover:bg-gray-100 flex items-center gap-2"
                 >
                   <FiLogOut /> Logout
-                </Link>
+                </button>
               </div>
             )}
           </div>
@@ -106,10 +125,11 @@ const Header: React.FC = () => {
                   setActiveTab(tab.key);
                   setMobileMenuOpen(false);
                 }}
-                className={`flex items-center gap-2 px-2 ${activeTab === tab.key
-                  ? "text-blue-600 font-medium"
-                  : "text-gray-600 hover:text-gray-900"
-                  }`}
+                className={`flex items-center gap-2 px-2 ${
+                  activeTab === tab.key
+                    ? "text-blue-600 font-medium"
+                    : "text-gray-600 hover:text-gray-900"
+                }`}
               >
                 {tab.icon} {tab.label}
               </Link>

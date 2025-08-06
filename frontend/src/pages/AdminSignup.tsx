@@ -1,15 +1,31 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSetAtom } from "jotai";
+import { adminSignupAtom } from "../atoms/authAtom";
+import { toast } from 'react-toastify'
 
 const AdminSignup: React.FC = () => {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [loading, setLoading] = useState(false)
+    const signup = useSetAtom(adminSignupAtom)
     const route = useNavigate();
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        console.log(name, email, password);
+        setLoading(true)
+        try {
+            const payload = { name, email, password };
+            await signup(payload)
+            toast.success("Admin created..");
+            route('/')
+        } catch (error) {
+            console.log('Error:', error)
+            toast.error(`${error}`)
+        } finally {
+            setLoading(false)
+        }
     };
 
     const switchToLogin = () => {
@@ -63,9 +79,14 @@ const AdminSignup: React.FC = () => {
 
                     <button
                         type="submit"
-                        className="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                        disabled={loading}
+                        className="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center"
                     >
-                        Sign up
+                        {loading ? (
+                            <div className="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                            "Sign Up"
+                        )}
                     </button>
                 </form>
 

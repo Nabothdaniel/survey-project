@@ -1,10 +1,12 @@
 import { useEffect, useRef } from "react";
 import { FiCalendar } from "react-icons/fi";
 import { gsap } from "gsap";
+import useProfile from "../../hooks/useProfile";
 
 const Welcome = () => {
   const textRef = useRef<HTMLHeadingElement>(null);
   const starsRef = useRef<HTMLDivElement>(null);
+  const { profile, loading } = useProfile();
 
   // Format current date
   const today = new Date();
@@ -14,20 +16,19 @@ const Welcome = () => {
     day: "numeric",
     year: "numeric",
   };
-  const formattedDate = today.toLocaleDateString("en-US", options).toUpperCase();
+  const formattedDate = today
+    .toLocaleDateString("en-US", options)
+    .toUpperCase();
 
   useEffect(() => {
-    // Animate the text in
     gsap.fromTo(
       textRef.current,
       { opacity: 0, y: 40, scale: 0.9 },
       { opacity: 1, y: 0, scale: 1, duration: 1.2, ease: "power3.out" }
     );
 
-    // Animate stars around Daniel
     if (starsRef.current) {
       const stars = starsRef.current.querySelectorAll(".star");
-
       stars.forEach((star, i) => {
         gsap.fromTo(
           star,
@@ -36,7 +37,7 @@ const Welcome = () => {
             opacity: 1,
             scale: 1,
             duration: 0.8,
-            repeat: 3, // twinkles 3 times
+            repeat: 3,
             yoyo: true,
             delay: i * 0.3,
             ease: "power2.inOut",
@@ -44,7 +45,6 @@ const Welcome = () => {
         );
       });
 
-      // Fade out and hide stars after 5s
       gsap.to(starsRef.current, {
         opacity: 0,
         duration: 1,
@@ -55,6 +55,15 @@ const Welcome = () => {
       });
     }
   }, []);
+
+  if (loading) {
+    return <p className="text-gray-500">Loading profile...</p>;
+  }
+
+  const fullName = profile?.name?.trim() || "Guest";
+  const firstName = fullName.includes(" ")
+    ? fullName.split(" ")[0]
+    : fullName; 
 
   return (
     <div className="mb-8 relative">
@@ -69,14 +78,9 @@ const Welcome = () => {
         Hi,{" "}
         <span className="relative inline-block">
           <span className="bg-gradient-to-r from-sky-400 via-blue-500 to-indigo-500 bg-clip-text text-transparent font-extrabold text-5xl px-1">
-            Daniel
+            {firstName}
           </span>
-
-          {/* Stars Container */}
-          <div
-            ref={starsRef}
-            className="absolute inset-0 pointer-events-none"
-          >
+          <div ref={starsRef} className="absolute inset-0 pointer-events-none">
             {[...Array(8)].map((_, i) => (
               <span
                 key={i}

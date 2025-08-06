@@ -80,7 +80,7 @@ const SignupForm: React.FC = () => {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                        className="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center"
                     >
                         {loading ? (
                             <div className="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />

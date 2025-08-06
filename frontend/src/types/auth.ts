@@ -16,3 +16,13 @@ export interface AuthPayload {
   email: string;
   password: string;
 }
+
+export interface Profile {
+  id: number | string;
+  name: string;
+  email: string;
+  role: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+

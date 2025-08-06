@@ -16,43 +16,68 @@ import IndexPage from "./components/Dashboard/subpages/index";
 import Outcomes from "./components/Dashboard/subpages/forms-and-outcomes";
 import Reports from "./components/Dashboard/subpages/reports";
 import PreviewPage from "./components/Dashboard/subpages/PreviewPage";
+import ErrorPage from "./extra/ErrorPage";
+import NotFoundPage from "./extra/NotFound";
+import AdminWrapper from "./routes/AdminRoutes";
+import ProtectedRoute from "./routes/ProtectedRoute";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <LoginForm />
+    element: <LoginForm />,
+    errorElement: <ErrorPage />, // handles errors in this route
   },
   {
     path: "/signup",
-    element: <SignupForm />
+    element: <SignupForm />,
+    errorElement: <ErrorPage />,
   },
   {
-    path: '/signup-admin',
-    element: <AdminSignup />
+    path: "/signup-admin",
+    element: <AdminSignup />,
+    errorElement: <ErrorPage />,
   },
   {
     path: "/dashboard",
-    element: <UserDashboard />,
+    element: (
+      <ProtectedRoute>
+        <UserDashboard />
+      </ProtectedRoute>
+    ),
+    errorElement: <ErrorPage />,
     children: [
       { index: true, element: <Dashboard /> },
       { path: "surveys", element: <SurveyPage /> },
-    ]
+    ],
   },
   {
     path: "/take-survey/:id",
-    element: <TakeSurvey />
+    element: <TakeSurvey />,
+    errorElement: <ErrorPage />,
   },
   {
     path: "/admin",
-    element: <AdminDashboard />,
+    element: (
+      <ProtectedRoute>
+        <AdminWrapper>
+          <AdminDashboard />
+        </AdminWrapper>
+      </ProtectedRoute>
+    ),
+    errorElement: <ErrorPage />,
     children: [
       { index: true, element: <IndexPage /> },
       { path: "forms-and-outcomes", element: <Outcomes /> },
       { path: "reports", element: <Reports /> },
       { path: "preview", element: <PreviewPage /> },
-    ]
+    ],
   },
-])
+  // Catch-all route for non-existent paths
+  {
+    path: "*",
+    element: <NotFoundPage />,
+  },
+]);
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
