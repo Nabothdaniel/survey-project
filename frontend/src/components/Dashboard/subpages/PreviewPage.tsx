@@ -87,7 +87,7 @@ const PreviewPage = () => {
 
       <div className="flex justify-end gap-3 mt-8">
         <button
-          onClick={() => navigate("/admin/forms-and-outcomes")}
+          onClick={() => navigate("/admin")}
           className="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
         >
           Back

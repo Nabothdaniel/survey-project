@@ -23,6 +23,7 @@ export interface Survey {
     options?: string[];
     required: boolean;
   }>;
+   status: "draft" | "preview" | "published";
 }
 
 
@@ -32,4 +33,11 @@ export type SurveyQuestion = {
   question: string;
   options?: string[];
   required: boolean;
+}
+
+export interface NewSurvey {
+  title: string;
+  description: string;
+  questions: SurveyQuestion[];
+  status: "draft" | "preview" | "published";
 }

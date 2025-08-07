@@ -2,9 +2,7 @@ import { useState } from "react";
 import { useAtom } from "jotai";
 import { useNavigate } from "react-router-dom";
 import { surveyAtom, draftsAtom } from "../../atoms/adminSurveyAtom";
-import type { SurveyQuestion } from "../../types";
-import { nanoid } from "nanoid";
-import Alert from "../ui/Alert";
+import type { SurveyQuestion, NewSurvey } from "../../types";
 
 import {
   FiEdit,
@@ -17,14 +15,20 @@ import {
   FiHelpCircle,
   FiEye,
 } from "react-icons/fi";
+import { toast } from "react-toastify";
+import { useSetAtom } from "jotai";
+import { createSurveyAtom } from "../../atoms/surveyAtoms";
+import { Spinner } from "../ui/Spinner";
 
 const FormSection = () => {
   const [survey, setSurvey] = useAtom(surveyAtom);
   const [drafts, setDrafts] = useAtom(draftsAtom);
-  const [alert, setAlert] = useState<{ type: "success" | "error" | "info", message: string } | null>(null);
   const [questionCounter, setQuestionCounter] = useState(
     survey.questions.length + 1
   );
+  const [isPublishing, setIsPublishing] = useState(false);
+  const publishSurvey = useSetAtom(createSurveyAtom)
+
 
   const navigate = useNavigate();
 
@@ -121,19 +125,41 @@ const FormSection = () => {
 
 
   const handleSaveDraft = () => {
-    if (!survey.formTitle.trim() && !survey.formDescription.trim() && survey.questions.length === 0) {
-      setAlert({ type: "error", message: "Cannot save. Your form is empty." });
+    const isEmptyForm =
+      !survey.formTitle.trim() &&
+      !survey.formDescription.trim() &&
+      survey.questions.length === 0;
+
+    if (isEmptyForm) {
+      toast.error("Cannot save. Your form is empty.");
       return;
     }
 
-    const draftId = survey.id || nanoid(6);
-    const updatedDrafts = drafts.filter((d) => d.id !== draftId);
-    setDrafts([...updatedDrafts, { ...survey, id: draftId, status: "draft" }]);
+    const isDuplicate = drafts.some(
+      (d) =>
+        d.formTitle.trim() === survey.formTitle.trim() &&
+        d.formDescription.trim() === survey.formDescription.trim()
+    );
 
+    if (isDuplicate) {
+      toast.info("This draft already exists.");
+      return;
+    }
+
+    const draft = {
+      id: `draft-${Date.now()}`, // temporary unique ID
+      formTitle: survey.formTitle.trim(),
+      formDescription: survey.formDescription.trim(),
+      questions: survey.questions,
+      status: "draft" as const,
+    };
+
+    setDrafts([...drafts, draft]);
     setSurvey(defaultSurvey);
-
-    setAlert({ type: "success", message: "Draft saved! Your form has been cleared." });
+    toast.success("Draft saved!");
   };
+
+
 
 
 
@@ -142,22 +168,34 @@ const FormSection = () => {
     navigate("/admin/preview");
   };
 
-  const handlePublish = () => {
-    setSurvey({ ...survey, status: "published" });
-    setAlert({ type: "success", message: "Survey created! redirecting...." });
-    setTimeout(() => { navigate("/admin/forms-and-outcomes"); }, 3000);
+  const mapFormToSurvey = (): NewSurvey => ({
+    title: survey.formTitle,
+    description: survey.formDescription,
+    questions: survey.questions,
+    status: "published",
+  });
+
+
+  const handlePublish = async () => {
+    setIsPublishing(true);
+    try {
+      const payload = mapFormToSurvey();
+      await publishSurvey(payload);
+      toast.success("Survey created! Redirecting...");
+      setTimeout(() => {
+        navigate("/admin/forms-and-outcomes");
+      }, 3000);
+    } catch (error: any) {
+      toast.error(error.error || "Failed to publish survey");
+    } finally {
+      setIsPublishing(false);
+    }
   };
+
+
 
   return (
     <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-sm border border-gray-200 p-6 sm:p-8">
-      {alert && (
-        <Alert
-          type={alert.type}
-          message={alert.message}
-          onClose={() => setAlert(null)}
-          duration={4000} // auto close after 4s
-        />
-      )}
       {/* Form Basic Info */}
       <div className="flex items-center gap-3 mb-6">
         <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
@@ -346,7 +384,14 @@ const FormSection = () => {
           onClick={handlePublish}
           className="px-6 py-3 text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 rounded-lg flex items-center gap-2"
         >
-          <FiStar /> Publish Survey
+          {isPublishing ? (
+            <Spinner />
+          ) : (
+            <>
+              <FiStar /> Publish Survey
+            </>
+          )}
+
         </button>
       </div>
     </div>
