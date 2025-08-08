@@ -1,12 +1,20 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState,useMemo } from "react";
 import { FiArrowLeft, FiCheckCircle } from "react-icons/fi";
 
 import { useSurveyStats } from "../../../hooks/useSurveyStats";
+import { useSetAtom } from "jotai";
+import { submitSurveyResponseAtom } from "../../../atoms/respondToSurveyAtom"; 
+import {Spinner} from '../../../components/ui/spinner'
+import {toast} from 'react-toastify'
+
 
 const TakeSurvey = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const [loading, setLoading] = useState(false);
+    const submitSurveyResponse = useSetAtom(submitSurveyResponseAtom);
+
 
     const {
         surveyData,
@@ -18,7 +26,10 @@ const TakeSurvey = () => {
 
 
     const savedStatus = survey ? surveyStatusMap[survey.id.toString()] : undefined;
-    const savedAnswers = savedStatus?.answers || {};
+
+const savedAnswers = useMemo(() => {
+  return savedStatus?.answers || {};
+}, [savedStatus]);
 
     const [answers, setAnswers] = useState<{ [key: number]: string }>(savedAnswers);
     const [submitted, setSubmitted] = useState(savedStatus?.status === "completed");
@@ -28,7 +39,7 @@ const TakeSurvey = () => {
         if (savedAnswers && JSON.stringify(savedAnswers) !== JSON.stringify(answers)) {
             setAnswers(savedAnswers);
         }
-    }, [savedAnswers]);
+    }, [savedAnswers,answers]);
 
    
 
@@ -63,25 +74,49 @@ if (!survey) {
         }));
     };
 
-    const handleSubmit = () => {
-        const missing = survey.questions.filter(
-            (q) => q.required && !answers[q.id]
-        );
-        if (missing.length > 0) {
-            alert("Please answer all required questions.");
-            return;
-        }
 
-        setSubmitted(true);
+const handleSubmit = async () => {
 
-        setSurveyStatusMap((prev) => ({
-            ...prev,
-            [survey.id.toString()]: {
-                status: "completed",
-                answers,
-            },
-        }));
-    };
+  const missing = survey.questions.filter(
+    (q) => q.required && !answers[q.id]
+  );
+
+  if (missing.length > 0) {
+    toast.error("Please answer all required questions.");
+    return;
+  }
+
+  const formattedAnswers = Object.entries(answers).map(([questionId, answer]) => ({
+    questionId,
+    answer,
+  }));
+
+  const payload = {
+    surveyId: survey.id,
+    answers: formattedAnswers,
+  };
+
+  try {
+    setLoading(true);
+    await submitSurveyResponse(payload);
+
+    setSurveyStatusMap((prev) => ({
+      ...prev,
+      [survey.id.toString()]: {
+        status: "completed",
+        answers,
+      },
+    }));
+
+    setSubmitted(true);
+    toast.success("Survey submitted successfully!");
+  } catch (err) {
+    console.error(err);
+    toast.error("Failed to submit the survey. Please try again.");
+  } finally {
+    setLoading(false);
+  }
+};
 
     if (submitted) {
         return (
@@ -188,10 +223,12 @@ if (!survey) {
                 ))}
 
                 <button
+                  disabled={loading}
                     type="submit"
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium"
+                     onClick={handleSubmit}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 flex items-center justify-center items-center rounded-lg font-medium"
                 >
-                    Submit Survey
+                    {loading ? <Spinner/> : 'Submit Survey'}
                 </button>
             </form>
         </div>

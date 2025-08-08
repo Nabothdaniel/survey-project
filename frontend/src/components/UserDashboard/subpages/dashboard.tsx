@@ -21,7 +21,7 @@ const Dashboard = () => {
 
     useEffect(() => {
         fetchSurveys();
-    }, []);
+    }, [fetchSurveys]);
 
     return (
         <>
