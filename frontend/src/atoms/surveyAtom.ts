@@ -1,45 +1,23 @@
+// src/atoms/surveyAtom.ts
 import { atom } from "jotai";
+import api from "../utils/api"; 
+import type { Survey } from "../types"; 
 
-export type SurveyStatus = "new" | "in_progress" | "completed";
+export const surveyAtom = atom<Survey[]>([]);
 
-import type { Survey } from "../types";
-
-export interface UserSurveyState {
-  [surveyId: number | string]: {
-    status: SurveyStatus;
-    answers: { [questionId: number]: string };
-  };
-}
-
-// Fake surveys
-export const surveyData: Survey[] = [
-  {
-    id: 1,
-    title: "Employee Satisfaction Survey",
-    description: "Help us improve your workplace experience by sharing your feedback.",
-    dueDate: "2025-08-15",
-    questions: [
-      { id: 1, type: "rating", question: "How satisfied are you with your work environment?", required: true },
-      { id: 2, type: "text", question: "What do you enjoy most about working here?", required: false },
-      {
-        id: 3,
-        type: "multiple-choice",
-        question: "Which benefit do you value most?",
-        options: ["Health Insurance", "Work From Home", "Learning Programs", "Team Events"],
-        required: true,
-      },
-    ],
-  },
-  {
-    id: 2,
-    title: "Product Feedback Survey",
-    description: "Share your thoughts on our latest product features.",
-    dueDate: "2025-08-20",
-    questions: [
-      { id: 1, type: "text", question: "What new feature would you like us to build?", required: true },
-    ],
-  },
-];
-
-// Atom for user survey state
-export const userSurveysAtom = atom<UserSurveyState>({});
+// Write-only atom to fetch surveys from API and update the atom
+export const fetchSurveysAtom = atom(
+  null,
+  async (_get, set, update: { onDone?: () => void; onError?: () => void }) => {
+    try {
+      const response = await api.get("/auth/surveys"); 
+      const surveys = response.data.surveys || response.data;
+      set(surveyAtom, surveys);
+      update?.onDone?.(); // ✅ call callback on success
+    } catch (error) {
+      console.error("Error fetching surveys:", error);
+      set(surveyAtom, []); 
+      update?.onError?.(); // ✅ call callback on error
+    }
+  }
+);

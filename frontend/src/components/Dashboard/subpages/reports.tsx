@@ -17,7 +17,7 @@ import jsPDF from "jspdf";
 import "jspdf-autotable";
 import { FiBarChart2, FiDownload, FiPrinter } from "react-icons/fi";
 import { motion } from "framer-motion";
-import { surveyData, userSurveysAtom } from "../../../atoms/surveyAtom";
+import { userSurveysAtom } from "../../../atoms/surveyAtom";
 
 const BLUE_COLORS = ["#1D4ED8", "#3B82F6", "#60A5FA", "#93C5FD"];
 

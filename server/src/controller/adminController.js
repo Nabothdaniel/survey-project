@@ -89,11 +89,12 @@ const createSurvey = async (req, res) => {
     // Step 2: Create questions (if any)
     if (questions && questions.length > 0) {
       const questionData = questions.map((q) => ({
-        text: q.text,
+        text: q.question,
         type: q.type,
         options: q.options || null,
         surveyId: survey.id,
       }));
+
 
       await Question.bulkCreate(questionData, { transaction: t });
     }
@@ -181,6 +182,7 @@ const getSurveyOutcomes = async (req, res) => {
         {
           model: Question,
           as: "questions",
+          attributes: ["id", "text", "type", "options"],
           include: [
             {
               model: Response,
@@ -202,13 +204,11 @@ const getSurveyOutcomes = async (req, res) => {
       return res.status(404).json({ success: false, message: "Survey not found" });
     }
 
-    // 1️⃣ Calculate total responses across all questions
     const totalSurveyResponses = survey.questions.reduce(
       (sum, q) => sum + q.responses.length,
       0
     );
 
-    // 2️⃣ Calculate outcomes with global percentages
     const outcomeData = survey.questions.map(question => {
       const totalResponses = question.responses.length;
       const answerCount = {};
@@ -221,13 +221,14 @@ const getSurveyOutcomes = async (req, res) => {
       const percentages = Object.keys(answerCount).map(ans => ({
         answer: ans,
         count: answerCount[ans],
-        // percentage relative to total survey responses
         percentage: ((answerCount[ans] / totalSurveyResponses) * 100).toFixed(2)
       }));
 
       return {
         questionId: question.id,
-        question: question.text,
+        text: question.text,
+        type: question.type,
+        options: question.options || [],
         totalResponses,
         outcomes: percentages
       };
@@ -246,7 +247,7 @@ const getSurveyOutcomes = async (req, res) => {
         }
       },
       totalSurveyResponses,
-      outcomes: outcomeData
+      questions: outcomeData
     });
 
   } catch (err) {
@@ -254,6 +255,7 @@ const getSurveyOutcomes = async (req, res) => {
     res.status(500).json({ success: false, message: "Failed to fetch survey outcomes" });
   }
 };
+
 
 
 const updateSurvey = async (req, res) => {

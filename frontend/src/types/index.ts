@@ -12,7 +12,7 @@ export interface UserDashboardProps {
 }
 
 export interface Survey {
-  id: number;
+  id: number | string;
   title: string;
   description: string;
   dueDate: string;
@@ -23,12 +23,11 @@ export interface Survey {
     options?: string[];
     required: boolean;
   }>;
-   status: "draft" | "preview" | "published";
 }
 
 
 export type SurveyQuestion = {
-  id: number;
+  id?: number;
   type: "text" | "multiple-choice" | "checkbox" | "rating";
   question: string;
   options?: string[];
@@ -41,3 +40,4 @@ export interface NewSurvey {
   questions: SurveyQuestion[];
   status: "draft" | "preview" | "published";
 }
+

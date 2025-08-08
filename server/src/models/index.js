@@ -6,7 +6,7 @@ import Question from './Question.js';
 import Response from './Response.js';
 
 // ======================
-// Setup associations
+// associations
 // ======================
 
 // User → Survey

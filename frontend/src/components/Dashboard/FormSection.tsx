@@ -42,6 +42,8 @@ const FormSection = () => {
       required: false,
     };
 
+    console.log(newQuestion)
+
     setSurvey({
       ...survey,
       questions: [...survey.questions, newQuestion],
@@ -160,6 +162,19 @@ const FormSection = () => {
   };
 
 
+  const mapFormToSurvey = (): NewSurvey => {
+    return {
+      title: survey.formTitle,
+      description: survey.formDescription,
+      status: survey.status as "draft" | "preview" | "published",
+      questions: survey.questions.map((q) => ({
+        type: q.type || "text",
+        question: q.question?.trim() || "",
+        options: q.type === "multiple-choice" ? q.options || [] : undefined,
+        required: q.required ?? false,
+      })),
+    };
+  };
 
 
 
@@ -168,31 +183,34 @@ const FormSection = () => {
     navigate("/admin/preview");
   };
 
-  const mapFormToSurvey = (): NewSurvey => ({
-    title: survey.formTitle,
-    description: survey.formDescription,
-    questions: survey.questions,
-    status: "published",
-  });
-
-
   const handlePublish = async () => {
     setIsPublishing(true);
     try {
       const payload = mapFormToSurvey();
+
+      // ✅ Validation: check for empty question texts
+      const hasEmptyQuestions = payload.questions.some(
+        (q) => !q.question || q.question.trim() === ""
+      );
+
+      if (hasEmptyQuestions) {
+        toast.error("All questions must have text.");
+        setIsPublishing(false);
+        return;
+      }
+
       await publishSurvey(payload);
+      setSurvey(defaultSurvey);
       toast.success("Survey created! Redirecting...");
       setTimeout(() => {
         navigate("/admin/forms-and-outcomes");
       }, 3000);
     } catch (error: any) {
-      toast.error(error.error || "Failed to publish survey");
+      toast.error(error?.error || "Failed to publish survey");
     } finally {
       setIsPublishing(false);
     }
   };
-
-
 
   return (
     <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-sm border border-gray-200 p-6 sm:p-8">

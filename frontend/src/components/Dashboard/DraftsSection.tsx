@@ -39,7 +39,7 @@ const DraftsSection = () => {
               </button>
 
               <button
-                onClick={() => removeDraft(draft.id)}
+                onClick={() => removeDraft(String(draft.id))}
                 className="px-3 py-2 bg-red-500 hover:bg-red-600 text-white text-sm rounded-lg flex items-center gap-2"
               >
                 <FiTrash /> Delete

@@ -1,47 +1,62 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useAtom } from "jotai";
-import { userSurveysAtom } from "../../../atoms/surveyAtom";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { FiArrowLeft, FiCheckCircle } from "react-icons/fi";
-import { surveyData } from "../../../atoms/surveyAtom";
+
+import { useSurveyStats } from "../../../hooks/useSurveyStats";
 
 const TakeSurvey = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const survey = surveyData.find((s) => s.id === Number(id));
 
-    const [userSurveys, setUserSurveys] = useAtom(userSurveysAtom);
-    const savedSurvey = survey ? userSurveys[survey.id] : null;
+    const {
+        surveyData,
+        surveyStatusMap,
+        setSurveyStatusMap,
+    } = useSurveyStats();
 
-    const [answers, setAnswers] = useState<{ [key: number]: string }>({});
-    const [submitted, setSubmitted] = useState(false);
+    const survey = surveyData.find((s) => s.id === String(id));
 
-    // Load saved progress on mount
+
+    const savedStatus = survey ? surveyStatusMap[survey.id.toString()] : undefined;
+    const savedAnswers = savedStatus?.answers || {};
+
+    const [answers, setAnswers] = useState<{ [key: number]: string }>(savedAnswers);
+    const [submitted, setSubmitted] = useState(savedStatus?.status === "completed");
+
+    // On mount, sync saved answers if any
     useEffect(() => {
-        if (savedSurvey) {
-            setAnswers(savedSurvey.answers || {});
-            if (savedSurvey.status === "completed") {
-                setSubmitted(true);
-            }
+        if (savedAnswers && JSON.stringify(savedAnswers) !== JSON.stringify(answers)) {
+            setAnswers(savedAnswers);
         }
-    }, [savedSurvey]);
+    }, [savedAnswers]);
 
-    if (!survey) {
-        return (
-            <div className="max-w-6xl mx-auto p-6">
-                <p className="text-red-600 font-semibold">Survey not found.</p>
-            </div>
-        );
-    }
+   
+
+
+
+   if (!surveyData.length) {
+    return (
+        <div className="max-w-6xl mx-auto p-6">
+            <p className="text-gray-600 font-medium">Loading survey...</p>
+        </div>
+    );
+}
+
+if (!survey) {
+    return (
+        <div className="max-w-6xl mx-auto p-6">
+            <p className="text-red-600 font-semibold">Survey not found.</p>
+        </div>
+    );
+}
 
     const handleChange = (questionId: number, value: string) => {
         const updatedAnswers = { ...answers, [questionId]: value };
         setAnswers(updatedAnswers);
 
-        // Save progress in jotai (mark as in_progress if not completed)
-        setUserSurveys((prev) => ({
+        setSurveyStatusMap((prev) => ({
             ...prev,
-            [survey.id]: {
+            [survey.id.toString()]: {
                 status: submitted ? "completed" : "in_progress",
                 answers: updatedAnswers,
             },
@@ -49,7 +64,6 @@ const TakeSurvey = () => {
     };
 
     const handleSubmit = () => {
-        // check required questions
         const missing = survey.questions.filter(
             (q) => q.required && !answers[q.id]
         );
@@ -60,10 +74,12 @@ const TakeSurvey = () => {
 
         setSubmitted(true);
 
-        // mark as completed
-        setUserSurveys((prev) => ({
+        setSurveyStatusMap((prev) => ({
             ...prev,
-            [survey.id]: { status: "completed", answers },
+            [survey.id.toString()]: {
+                status: "completed",
+                answers,
+            },
         }));
     };
 
@@ -96,7 +112,6 @@ const TakeSurvey = () => {
             <div className="bg-white rounded-lg shadow p-6 border border-gray-200 mb-6">
                 <h1 className="text-2xl font-bold text-gray-900">{survey.title}</h1>
                 <p className="text-gray-600 mt-2">{survey.description}</p>
-                <p className="text-sm text-gray-500 mt-2">Due: {survey.dueDate}</p>
             </div>
 
             <form
@@ -107,39 +122,50 @@ const TakeSurvey = () => {
                 className="space-y-6"
             >
                 {survey.questions.map((q) => (
-                    <div key={q.id} className="bg-white p-5 rounded-lg shadow border border-gray-200">
+                    <div
+                        key={q.id}
+                        className="bg-white p-5 rounded-lg shadow border border-gray-200"
+                    >
                         <label className="block text-gray-800 font-medium mb-3">
-                            {q.question}
+                            {q.text}
                             {q.required && <span className="text-red-500 ml-1">*</span>}
                         </label>
 
                         {q.type === "text" && (
                             <textarea
                                 className="w-full rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-0 border-0"
+                                placeholder ="type answer ...."
                                 rows={4}
                                 value={answers[q.id] || ""}
                                 onChange={(e) => handleChange(q.id, e.target.value)}
                             />
                         )}
 
+{q.type === "multiple-choice" && (
+  <div className="space-y-2">
+    {(Array.isArray(q.options)
+  ? q.options
+  : typeof q.options === "string"
+  ? JSON.parse(q.options)
+  : [])
+.map((opt) => (
+      <label key={opt} className="flex items-center gap-2 cursor-pointer">
+        <input
+          type="radio"
+          name={`q-${q.id}`}
+          value={opt}
+          checked={answers[q.id] === opt}
+          onChange={(e) => handleChange(q.id, e.target.value)}
+          className="text-blue-600 focus:ring-blue-500"
+        />
+        <span>{opt}</span>
+      </label>
+    ))}
+  </div>
+)}
 
-                        {q.type === "multiple-choice" && (
-                            <div className="space-y-2">
-                                {q.options?.map((opt) => (
-                                    <label key={opt} className="flex items-center gap-2 cursor-pointer">
-                                        <input
-                                            type="radio"
-                                            name={`q-${q.id}`}
-                                            value={opt}
-                                            checked={answers[q.id] === opt}
-                                            onChange={(e) => handleChange(q.id, e.target.value)}
-                                            className="text-blue-600 focus:ring-blue-500"
-                                        />
-                                        <span>{opt}</span>
-                                    </label>
-                                ))}
-                            </div>
-                        )}
+
+
 
                         {q.type === "rating" && (
                             <div className="flex gap-3">

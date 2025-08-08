@@ -10,7 +10,7 @@ const Response = sequelize.define("Response", {
         primaryKey: true
     },
     answer: {
-        type: DataTypes.STRING, // for MCQ store option, for open-ended store text
+        type: DataTypes.STRING, 
         allowNull: false,
     },
 }, {
