@@ -14,6 +14,12 @@ const Survey = sequelize.define("Survey", {
   type: DataTypes.UUID,
   allowNull: false,
 },
+status: {
+  type: DataTypes.ENUM("new", "in_progress", "completed"),
+  defaultValue: "new",
+  allowNull: false,
+},
+
 
 }, {
   tableName: "surveys",

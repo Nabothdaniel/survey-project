@@ -1,18 +1,27 @@
-// atoms/respondToSurveyAtom.js
-import { atom } from 'jotai';
-import api from '../utils/api'; 
+// atoms/respondToSurveyAtom.ts
+import { atom } from "jotai";
+import api from "../utils/api";
 
 export const respondToSurveyAtom = atom(null);
 
+export interface SurveyResponsePayload {
+  surveyId: string | number;
+  answers: {
+    questionId: string;
+    answer: string;
+  }[];
+}
+
 export const submitSurveyResponseAtom = atom(
   null,
-  async (get, set, responsePayload) => {
+  async (_get, _set, responsePayload: SurveyResponsePayload) => {
     try {
-      const res = await api.post('/response/respond', responsePayload);
-      console.log('Survey submitted successfully:', res.data);
-    } catch (error) {
-      console.error('Failed to submit survey:', error);
-      throw error?.response?.data || error.message || 'Unknown error';
+      return await api.post("/response/respond", responsePayload);
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: any }; message?: string };
+      console.error("Failed to submit survey:", err);
+
+      throw err.response?.data || err.message || "Unknown error";
     }
   }
 );

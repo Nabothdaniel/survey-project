@@ -1,4 +1,5 @@
-import { useAtom } from "jotai";
+/**
+ * import { useAtom } from "jotai";
 import { useState, useEffect, useRef } from "react";
 import gsap from "gsap";
 import {
@@ -17,12 +18,11 @@ import jsPDF from "jspdf";
 import "jspdf-autotable";
 import { FiBarChart2, FiDownload, FiPrinter } from "react-icons/fi";
 import { motion } from "framer-motion";
-import { userSurveysAtom } from "../../../atoms/surveyAtom";
 
 const BLUE_COLORS = ["#1D4ED8", "#3B82F6", "#60A5FA", "#93C5FD"];
 
 const Reports = () => {
-  const [userSurveys] = useAtom(userSurveysAtom);
+  const [userSurveys] = useAtom(null);
   const [selectedSurveyId, setSelectedSurveyId] = useState<number | null>(null);
 
   const cardRef = useRef<HTMLDivElement[]>([]);
@@ -100,7 +100,7 @@ const Reports = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 grid lg:grid-cols-[18rem_1fr] gap-6">
-      {/* Sidebar */}
+      {/* Sidebar 
       <div className=" relative">
         <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-4 h-fit sticky top-24">
           <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
@@ -124,7 +124,7 @@ const Reports = () => {
         </div>
       </div>
 
-      {/* Main Content */}
+      {/* Main Content }
       <div>
         {selectedSurvey ? (
           <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
@@ -132,7 +132,7 @@ const Reports = () => {
               {selectedSurvey.title} — Report
             </h2>
 
-            {/* Summary */}
+            {/* Summary }
             <div className="grid sm:grid-cols-3 gap-6 mb-8">
               {["Total Questions", "Answered", "Unanswered"].map((label, i) => {
                 const totalQuestions = selectedSurvey.questions.length;
@@ -160,7 +160,7 @@ const Reports = () => {
               })}
             </div>
 
-            {/* Charts */}
+            {/* Charts }
             <div className="grid lg:grid-cols-2 gap-8 mb-10">
               <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
                 <h3 className="text-lg font-semibold mb-4">
@@ -221,7 +221,7 @@ const Reports = () => {
               </div>
             </div>
 
-            {/* Export Buttons */}
+            {/* Export Buttons }
             <div className="flex flex-wrap gap-3 mb-6">
               <button
                 onClick={exportExcel}
@@ -237,7 +237,7 @@ const Reports = () => {
               </button>
             </div>
 
-            {/* Animated Answer Status */}
+            {/* Animated Answer Status }
             <div className="space-y-4">
               {selectedSurvey.questions.map((q, index) => {
                 const answered = !!surveyAnswers[q.id];
@@ -299,3 +299,5 @@ const Reports = () => {
 };
 
 export default Reports;
+
+ */

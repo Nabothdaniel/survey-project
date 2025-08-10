@@ -21,17 +21,20 @@ const SurveyPage: React.FC = () => {
 
   useEffect(() => {
     if (surveyData.length === 0) {
-      fetchSurveys();
+      fetchSurveys({
+        onDone: () => console.log("Surveys fetched!"),
+        onError: () => console.log("Failed to fetch surveys"),
+      });
     }
   }, [fetchSurveys, surveyData]);
 
   const survey = surveyData.find((s) => s.id === selectedSurveyId);
   let currentAnswers: Record<string, string> = {};
 
-if (survey?.id !== undefined) {
-  const key = survey.id.toString();
-  currentAnswers = surveyStatusMap[key]?.answers || {};
-}
+  if (survey?.id !== undefined) {
+    const key = survey.id.toString();
+    currentAnswers = surveyStatusMap[key]?.answers || {};
+  }
 
 
   const handleChange = (questionId: number, value: string) => {
@@ -112,7 +115,7 @@ if (survey?.id !== undefined) {
                   <div>
                     <h3 className="text-lg font-medium text-gray-900">{s.title}</h3>
                     <p className="text-sm text-gray-500 mt-1">{s.description}</p>
-                    <p className="text-xs text-gray-400 mt-1">Due: {s.dueDate}</p>
+  
                   </div>
                   <button
                     onClick={() => {
@@ -120,13 +123,12 @@ if (survey?.id !== undefined) {
                       setSubmitted(false);
                     }}
                     disabled={state === "completed"}
-                    className={`px-4 py-2 text-sm font-medium rounded-lg ${
-                      state === "new"
+                    className={`px-4 py-2 text-sm font-medium rounded-lg ${state === "new"
                         ? "bg-blue-600 text-white hover:bg-blue-700"
                         : state === "in_progress"
-                        ? "bg-yellow-500 text-white hover:bg-yellow-600"
-                        : "bg-gray-300 text-gray-600 cursor-not-allowed"
-                    }`}
+                          ? "bg-yellow-500 text-white hover:bg-yellow-600"
+                          : "bg-gray-300 text-gray-600 cursor-not-allowed"
+                      }`}
                   >
                     {state === "new" && "Start Survey"}
                     {state === "in_progress" && "Continue"}
@@ -142,7 +144,6 @@ if (survey?.id !== undefined) {
           <div className="bg-white rounded-lg shadow p-6 border border-gray-200 mb-6">
             <h1 className="text-2xl font-bold text-gray-900">{survey.title}</h1>
             <p className="text-gray-600 mt-2">{survey.description}</p>
-            <p className="text-sm text-gray-500 mt-2">Due: {survey.dueDate}</p>
           </div>
 
           <form
@@ -158,7 +159,7 @@ if (survey?.id !== undefined) {
                 className="bg-white p-5 rounded-lg shadow border border-gray-200"
               >
                 <label className="block text-gray-800 font-medium mb-3">
-                  {q.question}
+                  {q.text}
                   {q.required && <span className="text-red-500 ml-1">*</span>}
                 </label>
 

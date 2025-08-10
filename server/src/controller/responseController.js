@@ -12,44 +12,46 @@ export const respondToSurvey = async (req, res) => {
 
     // Ensure survey exists
     const survey = await Survey.findByPk(surveyId, {
-      include: [{ model: Question, as: "questions" }]
+      include: [{ model: Question, as: "questions" }],
     });
     if (!survey) {
       return res.status(404).json({ success: false, message: "Survey not found" });
     }
 
-    // Map and insert responses
-    const responseData = answers.map(a => ({
-      surveyId,
-      questionId: a.questionId,
-      userId,
-      answer: Array.isArray(a.answer) ? JSON.stringify(a.answer) : a.answer,
-    }));
+    // Use upsert for each response
+    for (const a of answers) {
+      const answerValue = Array.isArray(a.answer) ? JSON.stringify(a.answer) : a.answer;
 
-    await Response.bulkCreate(responseData, { transaction: t });
+      await Response.upsert({
+        surveyId,
+        questionId: a.questionId,
+        userId,
+        answer: answerValue,
+      }, { transaction: t });
+    }
+
     await t.commit();
 
-    // Fetch responses with user info
+    // Fetch responses with user and question info
     const savedResponses = await Response.findAll({
       where: { surveyId, userId },
       include: [
         { model: User, as: "respondent", attributes: ["id", "name", "email"] },
-        { model: Question, as: "question", attributes: ["id", "text", "type"] }
-      ]
+        { model: Question, as: "question", attributes: ["id", "text", "type"] },
+      ],
     });
 
     if (!savedResponses.length) {
       return res.status(404).json({ success: false, message: "No responses found" });
     }
 
-    // Build grouped response
     const respondentInfo = {
       id: savedResponses[0].respondent.id,
       name: savedResponses[0].respondent.name,
       email: savedResponses[0].respondent.email,
     };
 
-    const groupedAnswers = savedResponses.map(resp => ({
+    const groupedAnswers = savedResponses.map((resp) => ({
       questionId: resp.question.id,
       question: resp.question.text,
       type: resp.question.type,
@@ -60,13 +62,11 @@ export const respondToSurvey = async (req, res) => {
       success: true,
       message: "Survey responses submitted successfully",
       respondent: respondentInfo,
-      answers: groupedAnswers
+      answers: groupedAnswers,
     });
 
   } catch (err) {
-    if (!t.finished) {
-      await t.rollback();
-    }
+    if (!t.finished) await t.rollback();
     console.error(err);
     res.status(500).json({ success: false, message: "Failed to submit responses" });
   }

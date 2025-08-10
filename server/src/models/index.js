@@ -29,6 +29,7 @@ Response.belongsTo(Question, { foreignKey: "questionId", as: "question" });
 User.hasMany(Response, { foreignKey: "userId", as: "userResponses", onDelete: "CASCADE" });
 Response.belongsTo(User, { foreignKey: "userId", as: "respondent" });
 
+
 // ======================
 // Collect all models
 // ======================

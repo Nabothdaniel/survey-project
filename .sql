@@ -54,3 +54,30 @@ CREATE TABLE `responses` (
     ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--the responses was altered
+
+ALTER TABLE responses 
+ADD COLUMN surveyId CHAR(36) NOT NULL AFTER questionId,
+ADD CONSTRAINT fk_response_survey 
+    FOREIGN KEY (surveyId) REFERENCES surveys(id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE;
+
+ALTER TABLE responses
+ADD CONSTRAINT unique_response_per_user
+UNIQUE (surveyId, questionId, userId);
+
+CREATE TABLE SurveyStatuses (
+  id CHAR(36) NOT NULL PRIMARY KEY,
+  userId CHAR(36) NOT NULL,
+  surveyId CHAR(36) NOT NULL,
+  status ENUM('new', 'in-progress', 'completed') NOT NULL DEFAULT 'new',
+  createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+  CONSTRAINT fk_user FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE,
+  CONSTRAINT fk_survey FOREIGN KEY (surveyId) REFERENCES surveys(id) ON DELETE CASCADE,
+  UNIQUE KEY unique_user_survey (userId, surveyId)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+

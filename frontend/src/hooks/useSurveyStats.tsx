@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useAtom } from "jotai";
 import { surveyAtom, fetchSurveysAtom } from "../atoms/surveyAtom";
 import { surveyStatusAtom } from "../atoms/surveyStatusAtom";
+import api from "../utils/api";
+import type { SurveyStatusMap } from "../types";
 
 export const useSurveyStats = () => {
   const [surveyData, setSurveyData] = useAtom(surveyAtom);
@@ -12,10 +14,22 @@ export const useSurveyStats = () => {
 
   useEffect(() => {
     fetchSurveys({
-      onDone: () => setLoading(false),
+      onDone: () => {
+        const statusMap: SurveyStatusMap = {};
+        surveyData.forEach((survey) => {
+          statusMap[survey.id] = {
+          status: (survey.status as "new" | "in_progress" | "completed") ?? "new"
+
+          };
+        });
+        setSurveyStatusMap(statusMap);
+
+        setLoading(false);
+      },
       onError: () => setLoading(false),
     });
-  }, [fetchSurveys]);
+
+  }, [fetchSurveys, surveyData, setSurveyStatusMap]);
 
   const getStatus = (surveyId: string | number) =>
     surveyStatusMap[surveyId.toString()]?.status || "new";
@@ -39,6 +53,23 @@ export const useSurveyStats = () => {
     }
   };
 
+  const updateSurveyStatus = async (
+    surveyId: string | number,
+    newStatus: "new" | "in_progress" | "completed"
+  ) => {
+    // Update UI instantly
+    setSurveyStatusMap((prev) => ({
+      ...prev,
+      [surveyId.toString()]: { status: newStatus },
+    }));
+
+    try {
+      await api.patch(`/auth/update-status/${surveyId}`, { status: newStatus });
+    } catch (err) {
+      console.error("Failed to update survey status:", err);
+    }
+  };
+
   const stats = useMemo(() => {
     const values = Object.values(surveyStatusMap);
     return {
@@ -58,5 +89,6 @@ export const useSurveyStats = () => {
     getStatusColor,
     loading,
     stats,
+    updateSurveyStatus,
   };
 };

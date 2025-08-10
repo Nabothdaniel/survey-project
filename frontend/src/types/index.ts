@@ -19,10 +19,11 @@ export interface Survey {
   questions: Array<{
     id: number;
     type: string;
-    question: string;
+    text: string;
     options?: string[];
     required: boolean;
   }>;
+  status?:string;
 }
 
 
@@ -40,4 +41,11 @@ export interface NewSurvey {
   questions: SurveyQuestion[];
   status: "draft" | "preview" | "published";
 }
+
+export type SurveyStatusMap = {
+   [surveyId: string]: {
+    status: "new" | "in_progress" | "completed";
+    answers?: Record<string, string>; 
+  };
+};
 

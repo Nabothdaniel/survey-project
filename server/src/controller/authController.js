@@ -90,7 +90,7 @@ const loginUser = async (req, res) => {
 const userProfile = async (req, res) => {
   try {
     const user = await User.findByPk(req.user.id, {
-      attributes: ['id', 'name', 'email','role', 'createdAt', 'updatedAt'],
+      attributes: ['id', 'name', 'email', 'role', 'createdAt', 'updatedAt'],
     });
 
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
@@ -140,7 +140,7 @@ const updatePassword = async (req, res) => {
   if (!user)
     return res.status(404).json({ message: "No user found with this email." });
 
-  const resetCode = Math.floor(100000 + Math.random() * 900000); // 6-digit code
+  const resetCode = Math.floor(100000 + Math.random() * 900000);
   const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // Expires in 15 mins
 
   await User.update(
@@ -155,7 +155,7 @@ const updatePassword = async (req, res) => {
 
 
 
- const getAllSurveys = async (req, res) => {
+const getAllSurveys = async (req, res) => {
   try {
     const surveys = await Survey.findAll({
       include: [
@@ -166,18 +166,53 @@ const updatePassword = async (req, res) => {
         {
           model: User,
           as: "creator",
-          attributes: ["id", "name", "email"], 
+          attributes: ["id", "name", "email"],
         },
       ],
       order: [["createdAt", "DESC"]],
     });
 
-    res.status(200).json({ success: true, surveys });
+    // Flip question array (first becomes last)
+    const flippedSurveys = surveys.map((survey) => {
+      if (survey.questions?.length) {
+        survey.questions.reverse();
+      }
+      return survey;
+    });
+
+    res.status(200).json({ success: true, surveys: flippedSurveys });
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: "Failed to fetch surveys" });
   }
 };
+
+export const updateSurveyStatus = async (req, res) => {
+  const { surveyId } = req.params;
+  const { status } = req.body;
+
+
+  if (!["new", "in_progress", "completed"].includes(status)) {
+    return res.status(400).json({ error: "Invalid status" });
+  }
+
+  try {
+    const survey = await Survey.findByPk(surveyId);
+    if (!survey) {
+      return res.status(404).json({ error: "Survey not found" });
+    }
+
+    survey.status = status;
+    await survey.save();
+
+    res.status(200).json({ message: "Survey status updated", survey });
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+
+
 
 
 export {

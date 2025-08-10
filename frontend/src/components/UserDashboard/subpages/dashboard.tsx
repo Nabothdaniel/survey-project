@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useSetAtom } from "jotai";
 import { fetchSurveysAtom } from "../../../atoms/surveyAtom";
-import { FiCalendar, FiClipboard, FiClock, FiCheckCircle } from "react-icons/fi";
+import { FiClipboard, FiClock, FiCheckCircle } from "react-icons/fi";
 import { Link } from "react-router-dom";
 import { useSurveyStats } from "../../../hooks/useSurveyStats";
 import Welcome from "../../ui/Welcome";
@@ -14,13 +14,17 @@ const Dashboard = () => {
         getStatus,
         formatStatus,
         getStatusColor,
-        loading
+        loading,
+        updateSurveyStatus,
     } = useSurveyStats();
 
     const fetchSurveys = useSetAtom(fetchSurveysAtom);
 
     useEffect(() => {
-        fetchSurveys();
+        fetchSurveys({
+            onDone: () => console.log("Surveys fetched!"),
+            onError: () => console.log("Failed to fetch surveys"),
+        });
     }, [fetchSurveys]);
 
     return (
@@ -88,29 +92,25 @@ const Dashboard = () => {
                                                         </span>
                                                     </div>
                                                     <p className="text-sm text-gray-500">{survey.description}</p>
-                                                    <div className="mt-3 flex flex-wrap items-center gap-4 text-sm text-gray-500">
-                                                        <div className="flex items-center">
-                                                            <FiCalendar className="mr-1.5" />
-                                                            <span>Due: {survey.dueDate}</span>
-                                                        </div>
-                                                        <div className="flex items-center">
-                                                            <FiClock className="mr-1.5" />
-                                                            <span>Est. 5–10 mins</span>
-                                                        </div>
-                                                    </div>
+
                                                 </div>
                                                 <Link
                                                     to={`/take-survey/${survey.id}`}
-                                                    className={`px-4 py-2 text-sm text-center font-medium rounded-lg whitespace-nowrap ${
-                                                        status === "completed"
+                                                    onClick={() => {
+                                                        if (status === "new") {
+                                                            updateSurveyStatus(survey.id, "in_progress");
+                                                        }
+                                                    }}
+                                                    className={`px-4 py-2 text-sm text-center font-medium rounded-lg whitespace-nowrap ${status === "completed"
                                                             ? "bg-gray-100 text-gray-700 cursor-not-allowed pointer-events-none"
                                                             : "bg-blue-600 text-white hover:bg-blue-700"
-                                                    }`}
+                                                        }`}
                                                 >
                                                     {status === "new" && "Start Survey"}
                                                     {status === "in_progress" && "Continue"}
                                                     {status === "completed" && "Completed"}
                                                 </Link>
+
                                             </div>
                                         </div>
                                     );

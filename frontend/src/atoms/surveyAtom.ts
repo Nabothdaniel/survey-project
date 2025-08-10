@@ -13,7 +13,7 @@ export const fetchSurveysAtom = atom(
       const response = await api.get("/auth/surveys"); 
       const surveys = response.data.surveys || response.data;
       set(surveyAtom, surveys);
-      update?.onDone?.(); // ✅ call callback on success
+      update?.onDone?.(); 
     } catch (error) {
       console.error("Error fetching surveys:", error);
       set(surveyAtom, []); 

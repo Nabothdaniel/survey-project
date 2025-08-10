@@ -1,12 +1,11 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useEffect, useState,useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { FiArrowLeft, FiCheckCircle } from "react-icons/fi";
-
 import { useSurveyStats } from "../../../hooks/useSurveyStats";
 import { useSetAtom } from "jotai";
-import { submitSurveyResponseAtom } from "../../../atoms/respondToSurveyAtom"; 
-import {Spinner} from '../../../components/ui/spinner'
-import {toast} from 'react-toastify'
+import { submitSurveyResponseAtom } from "../../../atoms/respondToSurveyAtom";
+import { Spinner } from '../../../components/ui/Spinner'
+import { toast } from 'react-toastify'
 
 
 const TakeSurvey = () => {
@@ -20,46 +19,46 @@ const TakeSurvey = () => {
         surveyData,
         surveyStatusMap,
         setSurveyStatusMap,
+        updateSurveyStatus,
     } = useSurveyStats();
 
     const survey = surveyData.find((s) => s.id === String(id));
-
-
     const savedStatus = survey ? surveyStatusMap[survey.id.toString()] : undefined;
 
-const savedAnswers = useMemo(() => {
-  return savedStatus?.answers || {};
-}, [savedStatus]);
+    const savedAnswers = useMemo(() => {
+        return savedStatus?.answers || {};
+    }, [savedStatus]);
 
     const [answers, setAnswers] = useState<{ [key: number]: string }>(savedAnswers);
     const [submitted, setSubmitted] = useState(savedStatus?.status === "completed");
 
     // On mount, sync saved answers if any
     useEffect(() => {
-        if (savedAnswers && JSON.stringify(savedAnswers) !== JSON.stringify(answers)) {
+        if (savedAnswers && Object.keys(savedAnswers).length > 0) {
             setAnswers(savedAnswers);
         }
-    }, [savedAnswers,answers]);
-
-   
+    }, [savedAnswers]);
 
 
 
-   if (!surveyData.length) {
-    return (
-        <div className="max-w-6xl mx-auto p-6">
-            <p className="text-gray-600 font-medium">Loading survey...</p>
-        </div>
-    );
-}
 
-if (!survey) {
-    return (
-        <div className="max-w-6xl mx-auto p-6">
-            <p className="text-red-600 font-semibold">Survey not found.</p>
-        </div>
-    );
-}
+
+
+    if (!surveyData.length) {
+        return (
+            <div className="max-w-6xl mx-auto p-6">
+                <p className="text-gray-600 font-medium">Loading survey...</p>
+            </div>
+        );
+    }
+
+    if (!survey) {
+        return (
+            <div className="max-w-6xl mx-auto p-6">
+                <p className="text-red-600 font-semibold">Survey not found.</p>
+            </div>
+        );
+    }
 
     const handleChange = (questionId: number, value: string) => {
         const updatedAnswers = { ...answers, [questionId]: value };
@@ -75,48 +74,50 @@ if (!survey) {
     };
 
 
-const handleSubmit = async () => {
+    const handleSubmit = async () => {
 
-  const missing = survey.questions.filter(
-    (q) => q.required && !answers[q.id]
-  );
+        const missing = survey.questions.filter(
+            (q) => q.required && !answers[q.id]
+        );
 
-  if (missing.length > 0) {
-    toast.error("Please answer all required questions.");
-    return;
-  }
+        if (missing.length > 0) {
+            toast.error("Please answer all required questions.");
+            return;
+        }
 
-  const formattedAnswers = Object.entries(answers).map(([questionId, answer]) => ({
-    questionId,
-    answer,
-  }));
+        const formattedAnswers = Object.entries(answers).map(([questionId, answer]) => ({
+            questionId,
+            answer,
+        }));
 
-  const payload = {
-    surveyId: survey.id,
-    answers: formattedAnswers,
-  };
+        const payload = {
+            surveyId: survey.id,
+            answers: formattedAnswers,
+        };
 
-  try {
-    setLoading(true);
-    await submitSurveyResponse(payload);
+        try {
+            setLoading(true);
+            await submitSurveyResponse(payload);
 
-    setSurveyStatusMap((prev) => ({
-      ...prev,
-      [survey.id.toString()]: {
-        status: "completed",
-        answers,
-      },
-    }));
+            setSurveyStatusMap((prev) => ({
+                ...prev,
+                [survey.id.toString()]: {
+                    status: "completed",
+                    answers,
+                },
+            }));
 
-    setSubmitted(true);
-    toast.success("Survey submitted successfully!");
-  } catch (err) {
-    console.error(err);
-    toast.error("Failed to submit the survey. Please try again.");
-  } finally {
-    setLoading(false);
-  }
-};
+            setSubmitted(true);
+
+            updateSurveyStatus(survey.id, "completed");
+            toast.success("Survey submitted successfully!");
+        } catch (err) {
+            console.error(err);
+            toast.error("Failed to submit the survey. Please try again.");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     if (submitted) {
         return (
@@ -169,35 +170,35 @@ const handleSubmit = async () => {
                         {q.type === "text" && (
                             <textarea
                                 className="w-full rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-0 border-0"
-                                placeholder ="type answer ...."
+                                placeholder="type answer ...."
                                 rows={4}
                                 value={answers[q.id] || ""}
                                 onChange={(e) => handleChange(q.id, e.target.value)}
                             />
                         )}
 
-{q.type === "multiple-choice" && (
-  <div className="space-y-2">
-    {(Array.isArray(q.options)
-  ? q.options
-  : typeof q.options === "string"
-  ? JSON.parse(q.options)
-  : [])
-.map((opt) => (
-      <label key={opt} className="flex items-center gap-2 cursor-pointer">
-        <input
-          type="radio"
-          name={`q-${q.id}`}
-          value={opt}
-          checked={answers[q.id] === opt}
-          onChange={(e) => handleChange(q.id, e.target.value)}
-          className="text-blue-600 focus:ring-blue-500"
-        />
-        <span>{opt}</span>
-      </label>
-    ))}
-  </div>
-)}
+                        {q.type === "multiple-choice" && (
+                            <div className="space-y-2">
+                                {(Array.isArray(q.options)
+                                    ? q.options
+                                    : typeof q.options === "string"
+                                        ? JSON.parse(q.options)
+                                        : [])
+                                    .map((opt: any) => (
+                                        <label key={opt} className="flex items-center gap-2 cursor-pointer">
+                                            <input
+                                                type="radio"
+                                                name={`q-${q.id}`}
+                                                value={opt}
+                                                checked={answers[q.id] === opt}
+                                                onChange={(e) => handleChange(q.id, e.target.value)}
+                                                className="text-blue-600 focus:ring-blue-500"
+                                            />
+                                            <span>{opt}</span>
+                                        </label>
+                                    ))}
+                            </div>
+                        )}
 
 
 
@@ -223,12 +224,12 @@ const handleSubmit = async () => {
                 ))}
 
                 <button
-                  disabled={loading}
+                    disabled={loading}
                     type="submit"
-                     onClick={handleSubmit}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 flex items-center justify-center items-center rounded-lg font-medium"
+                    onClick={handleSubmit}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 flex  justify-center items-center rounded-lg font-medium"
                 >
-                    {loading ? <Spinner/> : 'Submit Survey'}
+                    {loading ? <Spinner /> : 'Submit Survey'}
                 </button>
             </form>
         </div>
