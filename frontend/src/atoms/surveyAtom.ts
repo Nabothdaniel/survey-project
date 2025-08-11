@@ -11,13 +11,20 @@ export const fetchSurveysAtom = atom(
   async (_get, set, update: { onDone?: () => void; onError?: () => void }) => {
     try {
       const response = await api.get("/auth/surveys"); 
-      const surveys = response.data.surveys || response.data;
+      const surveys = (response.data.surveys || response.data)
+  .map((survey: any) => ({
+    ...survey,
+    status: survey.userStatuses?.[0]?.status || "new"
+  }))
+
+
       set(surveyAtom, surveys);
       update?.onDone?.(); 
     } catch (error) {
       console.error("Error fetching surveys:", error);
       set(surveyAtom, []); 
-      update?.onError?.(); // ✅ call callback on error
+      update?.onError?.();
     }
   }
 );
+
