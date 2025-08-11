@@ -20,6 +20,8 @@ const Dashboard = () => {
 
     const fetchSurveys = useSetAtom(fetchSurveysAtom);
 
+     const activeSurveys = surveyData.filter((survey) => survey.status !== "completed");
+
     useEffect(() => {
         fetchSurveys({
             onDone: () => console.log("Surveys fetched!"),
@@ -72,7 +74,7 @@ const Dashboard = () => {
                                     </div>
                                 </div>
                             ) : (
-                                surveyData.map((survey) => {
+                                activeSurveys.map((survey) => {
                                     const status = getStatus(String(survey.id));
                                     return (
                                         <div

@@ -3,6 +3,7 @@ import { generateToken } from '../utils/helperfns.js';
 import User from '../models/User.js';
 import Survey from "../models/Survey.js";
 import Question from "../models/Question.js";
+import SurveyUserStatus from '../models/SurveyUserStatus.js';
 
 const registerUser = async (req, res) => {
   try {
@@ -168,11 +169,17 @@ const getAllSurveys = async (req, res) => {
           as: "creator",
           attributes: ["id", "name", "email"],
         },
+        {
+          model: SurveyUserStatus,
+          as: "userStatuses", 
+          where: { userId: req.user.id },
+          required: false, // still return surveys even if no status exists
+        },
       ],
       order: [["createdAt", "DESC"]],
     });
 
-    // Flip question array (first becomes last)
+    // Reverse question order
     const flippedSurveys = surveys.map((survey) => {
       if (survey.questions?.length) {
         survey.questions.reverse();
@@ -190,28 +197,33 @@ const getAllSurveys = async (req, res) => {
 export const updateSurveyStatus = async (req, res) => {
   const { surveyId } = req.params;
   const { status } = req.body;
-
+  const userId = req.user.id;
 
   if (!["new", "in_progress", "completed"].includes(status)) {
     return res.status(400).json({ error: "Invalid status" });
   }
 
   try {
-    const survey = await Survey.findByPk(surveyId);
-    if (!survey) {
-      return res.status(404).json({ error: "Survey not found" });
+    const [record, created] = await SurveyUserStatus.findOrCreate({
+      where: { surveyId, userId },
+      defaults: { status },
+    });
+
+    if (!created) {
+      record.status = status;
+      await record.save();
     }
 
-    survey.status = status;
-    await survey.save();
-
-    res.status(200).json({ message: "Survey status updated", survey });
+    res.status(200).json({
+      message: "Survey status updated",
+      status: record.status,
+      created: created
+    });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: "Server error" });
   }
 };
-
-
 
 
 

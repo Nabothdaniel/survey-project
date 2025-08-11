@@ -8,21 +8,18 @@ export const surveyAtom = atom<Survey[]>([]);
 // Write-only atom to fetch surveys from API and update the atom
 export const fetchSurveysAtom = atom(
   null,
-  async (_get, set, update: { onDone?: () => void; onError?: () => void }) => {
+  async (_get, set, update: { onDone?: (surveys: Survey[]) => void; onError?: () => void }) => {
     try {
-      const response = await api.get("/auth/surveys"); 
-      const surveys = (response.data.surveys || response.data)
-  .map((survey: any) => ({
-    ...survey,
-    status: survey.userStatuses?.[0]?.status || "new"
-  }))
-
-
+      const response = await api.get("/auth/surveys");
+      const surveys = (response.data.surveys || response.data).map((s: any) => ({
+        ...s,
+        status: s.userStatuses?.[0]?.status || "new"
+      }));
       set(surveyAtom, surveys);
-      update?.onDone?.(); 
+      update?.onDone?.(surveys);
     } catch (error) {
       console.error("Error fetching surveys:", error);
-      set(surveyAtom, []); 
+      set(surveyAtom, []);
       update?.onError?.();
     }
   }

@@ -4,6 +4,7 @@ import User from './User.js';
 import Survey from './Survey.js';
 import Question from './Question.js';
 import Response from './Response.js';
+import SurveyUserStatus from './SurveyUserStatus.js';
 
 // ======================
 // associations
@@ -29,11 +30,19 @@ Response.belongsTo(Question, { foreignKey: "questionId", as: "question" });
 User.hasMany(Response, { foreignKey: "userId", as: "userResponses", onDelete: "CASCADE" });
 Response.belongsTo(User, { foreignKey: "userId", as: "respondent" });
 
+// ======================
+// SurveyUserStatus associations
+// ======================
+User.hasMany(SurveyUserStatus, { foreignKey: "userId", as: "surveyStatuses", onDelete: "CASCADE" });
+SurveyUserStatus.belongsTo(User, { foreignKey: "userId", as: "user" });
+
+Survey.hasMany(SurveyUserStatus, { foreignKey: "surveyId", as: "userStatuses", onDelete: "CASCADE" });
+SurveyUserStatus.belongsTo(Survey, { foreignKey: "surveyId", as: "survey" });
 
 // ======================
 // Collect all models
 // ======================
-const models = { User, Survey, Question, Response };
+const models = { User, Survey, Question, Response, SurveyUserStatus };
 
 export { sequelize };
 export default models;

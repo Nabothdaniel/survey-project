@@ -18,6 +18,7 @@ const SurveyPage: React.FC = () => {
   } = useSurveyStats();
 
   const fetchSurveys = useSetAtom(fetchSurveysAtom);
+   const activeSurveys = surveyData.filter((survey) => survey.status !== "completed");
 
   useEffect(() => {
     if (surveyData.length === 0) {
@@ -105,7 +106,7 @@ const SurveyPage: React.FC = () => {
             </h2>
           </div>
           <div className="divide-y divide-gray-200">
-            {surveyData.map((s) => {
+            {activeSurveys.map((s) => {
               const state: SurveyStatus = getStatus(s.id);
               return (
                 <div
