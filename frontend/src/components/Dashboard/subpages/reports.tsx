@@ -7,7 +7,8 @@ import {
 } from "recharts";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
-import "jspdf-autotable";
+import autoTable from "jspdf-autotable";
+
 import { FiBarChart2, FiDownload, FiPrinter } from "react-icons/fi";
 import type { TableRow, Survey, SurveyOutcome } from "../../../types";
 import { surveyAtom, fetchSurveysAtom } from "../../../atoms/surveyAtom";
@@ -30,6 +31,17 @@ const Reports = () => {
   const [loadingOutcomes, setLoadingOutcomes] = useState(false);
 
   const cardRef = useRef<HTMLDivElement[]>([]);
+
+  const randomId = () => {
+  const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+  let result = "";
+  for (let i = 0; i < 6; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+};
+
+
 
   // Fetch surveys on mount
   useEffect(() => {
@@ -55,7 +67,9 @@ const Reports = () => {
     fetchSurveyOutcomes({
       surveyId: selectedSurveyId,
       onDone: (outcomes: SurveyOutcome[]) => {
+        console.log(outcomes)
         setSurveyOutcomes(outcomes);
+        console.log(outcomes)
         setLoadingOutcomes(false);
       },
       onError: () => {
@@ -75,17 +89,20 @@ const Reports = () => {
   const unansweredCount = Math.max(totalQuestions * totalResponses - answeredCount, 0);
 
   // Table Data
-  const tableData: TableRow[] = selectedSurvey
-    ? surveyOutcomes.map((o) => {
+  
+const tableData: TableRow[] = selectedSurvey
+  ? surveyOutcomes.map((o, idx) => {
       const question = Object.keys(o.data)[0];
       return {
-        User: o.id,
+        User: `user-${randomId()}${idx}`,
         Question: question,
         Answer: o.data[question] || "—",
         Status: o.data[question] ? "Answered" : "Unanswered"
       };
     })
-    : [];
+  : [];
+
+
 
   // Export Excel with toast feedback
   const exportExcel = () => {
@@ -107,22 +124,35 @@ const Reports = () => {
     try {
       const doc = new jsPDF();
       doc.text("Survey Responses Report", 14, 16);
-      (doc as any).autoTable({
+
+      autoTable(doc, {
         startY: 25,
         head: [["User", "Question", "Answer", "Status"]],
         body: tableData.map((row: TableRow) => [
           row.User,
           row.Question,
           row.Answer,
-          row.Status
-        ])
+          row.Status,
+        ]),
       });
+
       doc.save("Survey_Responses.pdf");
-      toast.update(toastId, { render: "PDF exported successfully!", type: "success", isLoading: false, autoClose: 3000 });
+      toast.update(toastId, {
+        render: "PDF exported successfully!",
+        type: "success",
+        isLoading: false,
+        autoClose: 3000,
+      });
     } catch (error) {
-      toast.update(toastId, { render: "Failed to export PDF.", type: "error", isLoading: false, autoClose: 3000 });
+      toast.update(toastId, {
+        render: "Failed to export PDF.",
+        type: "error",
+        isLoading: false,
+        autoClose: 3000,
+      });
     }
   };
+
 
   // GSAP animation for cards on survey or outcomes change
   useEffect(() => {
@@ -136,12 +166,18 @@ const Reports = () => {
     });
   }, [selectedSurveyId, surveyOutcomes]);
 
-  // Chart Data
-  const barData = selectedSurvey?.fields?.map((question: string) => {
+  // Chart Data with Q1, Q2... and full question text stored for tooltip
+  const questions = selectedSurvey?.fields || [];
+  const barData = questions.map((question: string, idx: number) => {
     const answered = surveyOutcomes.filter(o => o.data[question]).length;
     const unanswered = totalResponses - answered;
-    return { name: question, Answered: answered, Unanswered: unanswered };
-  }) || [];
+    return {
+      name: `Q${idx + 1}`,      // short label for X-axis
+      fullQuestion: question,    // full question for tooltip
+      Answered: answered,
+      Unanswered: unanswered
+    };
+  });
 
   const pieData = [
     { name: "Answered", value: answeredCount },
@@ -167,8 +203,8 @@ const Reports = () => {
                   key={survey.id}
                   onClick={() => setSelectedSurveyId(survey.id)}
                   className={`p-3 rounded-lg cursor-pointer text-sm font-medium transition ${selectedSurveyId === survey.id
-                      ? "bg-blue-100 border border-blue-500 text-blue-700"
-                      : "hover:bg-gray-100 text-gray-700"
+                    ? "bg-blue-100 border border-blue-500 text-blue-700"
+                    : "hover:bg-gray-100 text-gray-700"
                     }`}
                 >
                   {survey.title}
@@ -228,17 +264,15 @@ const Reports = () => {
                     barSize={30}
                     margin={{ top: 10, right: 20, bottom: 50, left: 20 }}
                   >
-                    {/* XAxis: no grid lines, only tick labels spaced */}
                     <XAxis
                       dataKey="name"
                       tick={{ fill: "#1E40AF", fontWeight: "600", fontSize: 13 }}
-                      interval={0} // show all labels
+                      interval={0}
                       angle={-35}
                       textAnchor="end"
                       axisLine={false}
                       tickLine={false}
                     />
-                    {/* YAxis: no grid lines */}
                     <YAxis
                       tick={{ fill: "#1E40AF", fontWeight: "600" }}
                       axisLine={false}
@@ -248,7 +282,22 @@ const Reports = () => {
                     />
                     <Tooltip
                       cursor={{ fill: "rgba(0,0,0,0.1)" }}
-                      contentStyle={{ borderRadius: 8, border: "none" }}
+                      content={({ active, payload, label }) => {
+                        if (active && payload && payload.length) {
+                          const data = barData.find(d => d.name === label);
+                          return (
+                            <div className="bg-white p-2 rounded shadow-lg border border-gray-300 text-sm max-w-xs">
+                              <div className="font-semibold mb-1">{data?.fullQuestion}</div>
+                              {payload.map((entry, index) => (
+                                <div key={index} style={{ color: entry.color }}>
+                                  {entry.name}: {entry.value}
+                                </div>
+                              ))}
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
                     />
                     <Bar dataKey="Answered" fill="#3B82F6" radius={[10, 10, 0, 0]} />
                     <Bar dataKey="Unanswered" fill="#93C5FD" radius={[10, 10, 0, 0]} />
