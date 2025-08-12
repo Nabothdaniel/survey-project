@@ -20,7 +20,7 @@ const Dashboard = () => {
 
     const fetchSurveys = useSetAtom(fetchSurveysAtom);
 
-     const activeSurveys = surveyData.filter((survey) => survey.status !== "completed");
+    const activeSurveys = surveyData.filter((survey) => survey.status !== "completed");
 
     useEffect(() => {
         fetchSurveys({
@@ -73,6 +73,10 @@ const Dashboard = () => {
                                         <p className="text-blue-600 text-sm font-medium">Loading surveys...</p>
                                     </div>
                                 </div>
+                            ) : activeSurveys.length === 0 ? (
+                                <div className="flex items-center justify-center h-[60vh]">
+                                    <p className="text-gray-500 text-sm font-medium">No surveys available</p>
+                                </div>
                             ) : (
                                 activeSurveys.map((survey) => {
                                     const status = getStatus(String(survey.id));
@@ -94,7 +98,6 @@ const Dashboard = () => {
                                                         </span>
                                                     </div>
                                                     <p className="text-sm text-gray-500">{survey.description}</p>
-
                                                 </div>
                                                 <Link
                                                     to={`/take-survey/${survey.id}`}
@@ -112,12 +115,12 @@ const Dashboard = () => {
                                                     {status === "in_progress" && "Continue"}
                                                     {status === "completed" && "Completed"}
                                                 </Link>
-
                                             </div>
                                         </div>
                                     );
                                 })
                             )}
+
                         </div>
                     </div>
                 </div>

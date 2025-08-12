@@ -42,7 +42,7 @@ const Header = () => {
 
   const handleLogout = async () => {
     await logout();
-    toast.success("Loggin out.....")
+    toast.success("Logged out successfully.....")
    setTimeout(() => {
       route("/"); 
    }, 3000);

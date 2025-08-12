@@ -20,6 +20,14 @@ import { useSetAtom } from "jotai";
 import { createSurveyAtom } from "../../atoms/surveyAtoms";
 import { Spinner } from "../ui/Spinner";
 
+  type defaultSurveyType = {
+    id: string;
+    formTitle: string;
+    formDescription: string;
+    questions: any[];
+    status: "draft" | "preview" | "published";
+  }
+
 const FormSection = () => {
   const [survey, setSurvey] = useAtom(surveyAtom);
   const [drafts, setDrafts] = useAtom(draftsAtom);
@@ -108,13 +116,7 @@ const FormSection = () => {
     });
   };
 
-  type defaultSurveyType = {
-    id: string;
-    formTitle: string;
-    formDescription: string;
-    questions: any[];
-    status: "draft" | "preview" | "published";
-  }
+
 
 
   const defaultSurvey: defaultSurveyType = {
@@ -184,11 +186,20 @@ const FormSection = () => {
   };
 
   const handlePublish = async () => {
+    const isEmptyForm =
+      !survey.formTitle.trim() &&
+      !survey.formDescription.trim() &&
+      survey.questions.length === 0;
+
+    if (isEmptyForm) {
+      toast.error("Cannot submit  Your form is empty.");
+      return;
+    }
     setIsPublishing(true);
     try {
       const payload = mapFormToSurvey();
 
-      // ✅ Validation: check for empty question texts
+      //Validation: check for empty question texts
       const hasEmptyQuestions = payload.questions.some(
         (q) => !q.question || q.question.trim() === ""
       );

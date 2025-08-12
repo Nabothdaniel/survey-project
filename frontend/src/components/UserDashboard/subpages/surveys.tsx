@@ -10,6 +10,7 @@ type SurveyStatus = "new" | "in_progress" | "completed";
 const SurveyPage: React.FC = () => {
   const [selectedSurveyId, setSelectedSurveyId] = useState<number | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(true); // NEW
 
   const {
     surveyData,
@@ -22,16 +23,21 @@ const SurveyPage: React.FC = () => {
   } = useSurveyStats();
 
   const fetchSurveys = useSetAtom(fetchSurveysAtom);
-   const activeSurveys = surveyData.filter((survey) => survey.status !== "completed");
+  const activeSurveys = surveyData.filter((survey) => survey.status !== "completed");
 
   useEffect(() => {
-    if (surveyData.length === 0) {
-      fetchSurveys({
-        onDone: () => console.log("Surveys fetched!"),
-        onError: () => console.log("Failed to fetch surveys"),
-      });
-    }
-  }, [fetchSurveys, surveyData]);
+    setLoading(true); // start loading
+    fetchSurveys({
+      onDone: () => {
+        console.log("Surveys fetched!");
+        setLoading(false);
+      },
+      onError: () => {
+        console.log("Failed to fetch surveys");
+        setLoading(false);
+      },
+    });
+  }, [fetchSurveys]);
 
   const survey = surveyData.find((s) => s.id === selectedSurveyId);
   let currentAnswers: Record<string, string> = {};
@@ -40,7 +46,6 @@ const SurveyPage: React.FC = () => {
     const key = survey.id.toString();
     currentAnswers = surveyStatusMap[key]?.answers || {};
   }
-
 
   const handleChange = (questionId: number, value: string) => {
     if (!survey) return;
@@ -109,53 +114,72 @@ const SurveyPage: React.FC = () => {
               Available Surveys
             </h2>
           </div>
-          <div className="divide-y divide-gray-200">
-            {activeSurveys.map((survey) => {
-              const status: SurveyStatus = getStatus(survey.id);
-              return (
-                                                        <div
-                                            key={survey.id}
-                                            className="p-4 sm:p-6 hover:bg-gray-50 transition-colors"
-                                        >
-                                            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-                                                <div className="flex-1">
-                                                    <div className="flex flex-wrap items-center gap-2 mb-2">
-                                                        <h3 className="text-lg font-medium text-gray-900">
-                                                            {survey.title}
-                                                        </h3>
-                                                        <span
-                                                            className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(status)}`}
-                                                        >
-                                                            {formatStatus(status)}
-                                                        </span>
-                                                    </div>
-                                                    <p className="text-sm text-gray-500">{survey.description}</p>
 
-                                                </div>
-                                                <Link
-                                                    to={`/take-survey/${survey.id}`}
-                                                    onClick={() => {
-                                                        if (status === "new") {
-                                                            updateSurveyStatus(survey.id, "in_progress");
-                                                        }
-                                                    }}
-                                                    className={`px-4 py-2 text-sm text-center font-medium rounded-lg whitespace-nowrap ${status === "completed"
-                                                            ? "bg-gray-100 text-gray-700 cursor-not-allowed pointer-events-none"
-                                                            : "bg-blue-600 text-white hover:bg-blue-700"
-                                                        }`}
-                                                >
-                                                    {status === "new" && "Start Survey"}
-                                                    {status === "in_progress" && "Continue"}
-                                                    {status === "completed" && "Completed"}
-                                                </Link>
-
-                                            </div>
-                                        </div>
-              );
-            })}
-          </div>
+          {/* Loading State */}
+          {loading ? (
+            <div className="flex items-center justify-center h-[60vh]">
+              <div className="flex flex-col items-center space-y-3">
+                <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                <p className="text-blue-600 text-sm font-medium">Loading surveys...</p>
+              </div>
+            </div>
+          ) : activeSurveys.length === 0 ? (
+            // No Surveys Message
+            <div className="flex items-center justify-center h-[60vh]">
+              <p className="text-gray-500 text-sm font-medium">No surveys available</p>
+            </div>
+          ) : (
+            // Survey List
+            <div className="divide-y divide-gray-200">
+              {activeSurveys.map((survey) => {
+                const status: SurveyStatus = getStatus(survey.id);
+                return (
+                  <div
+                    key={survey.id}
+                    className="p-4 sm:p-6 hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                      <div className="flex-1">
+                        <div className="flex flex-wrap items-center gap-2 mb-2">
+                          <h3 className="text-lg font-medium text-gray-900">
+                            {survey.title}
+                          </h3>
+                          <span
+                            className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
+                              status
+                            )}`}
+                          >
+                            {formatStatus(status)}
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-500">{survey.description}</p>
+                      </div>
+                      <Link
+                        to={`/take-survey/${survey.id}`}
+                        onClick={() => {
+                          if (status === "new") {
+                            updateSurveyStatus(survey.id, "in_progress");
+                          }
+                        }}
+                        className={`px-4 py-2 text-sm text-center font-medium rounded-lg whitespace-nowrap ${
+                          status === "completed"
+                            ? "bg-gray-100 text-gray-700 cursor-not-allowed pointer-events-none"
+                            : "bg-blue-600 text-white hover:bg-blue-700"
+                        }`}
+                      >
+                        {status === "new" && "Start Survey"}
+                        {status === "in_progress" && "Continue"}
+                        {status === "completed" && "Completed"}
+                      </Link>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       ) : (
+        // Survey Form
         <div>
           <div className="bg-white rounded-lg shadow p-6 border border-gray-200 mb-6">
             <h1 className="text-2xl font-bold text-gray-900">{survey.title}</h1>

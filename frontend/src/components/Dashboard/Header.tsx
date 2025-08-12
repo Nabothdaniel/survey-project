@@ -32,7 +32,7 @@ const Header: React.FC = () => {
   const firstLetter = profile?.name ? profile.name.charAt(0).toUpperCase() : "A";
   const handleLogout = async () => {
     await logout();
-    toast.success('logging out....')
+    toast.success('logged out succesfully....')
     setTimeout(()=> navigate("/", { replace: true }),1500)
   };
 
