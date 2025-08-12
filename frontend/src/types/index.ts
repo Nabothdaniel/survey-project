@@ -24,6 +24,8 @@ export interface Survey {
     required: boolean;
   }>;
   status?:string;
+   totalResponses?: number;
+  fields?: string[];
 }
 
 
@@ -48,4 +50,12 @@ export type SurveyStatusMap = {
     answers?: Record<string, string>; 
   };
 };
+
+
+export type SurveyOutcome = {
+  id: number;
+  surveyId: number;
+  data: Record<string, string>;
+};
+
 
