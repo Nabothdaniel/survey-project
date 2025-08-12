@@ -1,9 +1,8 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
   FiBarChart2,
   FiFileText,
-  FiSettings,
   FiChevronDown,
   FiMenu,
   FiX,
@@ -15,13 +14,14 @@ import { logoutAtom } from "../../atoms/authAtom";
 import { toast } from "react-toastify";
 
 const Header: React.FC = () => {
-  const [activeTab, setActiveTab] = useState("dashboard");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
 
   const [profile] = useAtom(profileAtom);
   const [, logout] = useAtom(logoutAtom);
   const navigate = useNavigate();
+  const location = useLocation();
+
 
   const navLinks = [
     { key: "dashboard", label: "Dashboard", icon: <FiBarChart2 />, path: "/admin" },
@@ -33,7 +33,7 @@ const Header: React.FC = () => {
   const handleLogout = async () => {
     await logout();
     toast.success('logged out succesfully....')
-    setTimeout(()=> navigate("/", { replace: true }),1500)
+    setTimeout(() => navigate("/", { replace: true }), 1500)
   };
 
   return (
@@ -49,20 +49,21 @@ const Header: React.FC = () => {
 
         {/* Desktop Nav */}
         <nav className="hidden md:flex gap-6 text-sm font-medium">
-          {navLinks.map((tab) => (
-            <Link
-              key={tab.key}
-              to={tab.path}
-              onClick={() => setActiveTab(tab.key)}
-              className={`flex items-center gap-1 ${
-                activeTab === tab.key
+          <nav className="hidden md:flex gap-6 text-sm font-medium">
+            {navLinks.map((tab) => (
+              <Link
+                key={tab.key}
+                to={tab.path}
+                className={`flex items-center gap-1 ${location.pathname === tab.path
                   ? "text-blue-600 border-b-2 border-blue-600"
                   : "text-gray-600 hover:text-gray-900"
-              }`}
-            >
-              {tab.icon} {tab.label}
-            </Link>
-          ))}
+                  }`}
+              >
+                {tab.icon} {tab.label}
+              </Link>
+            ))}
+          </nav>
+
         </nav>
 
         {/* Right Side */}
@@ -80,9 +81,8 @@ const Header: React.FC = () => {
                 {profile?.name || "Admin User"}
               </span>
               <FiChevronDown
-                className={`text-gray-400 text-xs transition-transform ${
-                  profileOpen ? "rotate-180" : ""
-                }`}
+                className={`text-gray-400 text-xs transition-transform ${profileOpen ? "rotate-180" : ""
+                  }`}
               />
             </button>
 
@@ -116,25 +116,21 @@ const Header: React.FC = () => {
       {/* Mobile Nav */}
       {mobileMenuOpen && (
         <div className="md:hidden mt-4 flex flex-col gap-4 border-t border-gray-200 pt-4">
-          {[...navLinks, { key: "settings", label: "Settings", icon: <FiSettings />, path: "/settings" }].map(
-            (tab) => (
+          <nav className="hidden md:flex gap-6 text-sm font-medium">
+            {navLinks.map((tab) => (
               <Link
                 key={tab.key}
                 to={tab.path}
-                onClick={() => {
-                  setActiveTab(tab.key);
-                  setMobileMenuOpen(false);
-                }}
-                className={`flex items-center gap-2 px-2 ${
-                  activeTab === tab.key
-                    ? "text-blue-600 font-medium"
+                className={`flex items-center gap-1 ${location.pathname === tab.path
+                    ? "text-blue-600 border-b-2 border-blue-600"
                     : "text-gray-600 hover:text-gray-900"
-                }`}
+                  }`}
               >
                 {tab.icon} {tab.label}
               </Link>
-            )
-          )}
+            ))}
+          </nav>
+
         </div>
       )}
     </header>

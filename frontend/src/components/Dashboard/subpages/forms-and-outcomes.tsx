@@ -24,7 +24,7 @@ const Outcomes: React.FC = () => {
   useEffect(() => {
     if (selectedSurveyId) {
       fetchOutcomes({
-        surveyId:Number(selectedSurveyId),
+        surveyId:selectedSurveyId,
         onDone: (data) => console.log("Fetched outcomes:", data),
         onError: () => console.error("Failed to fetch outcomes")
       });
@@ -78,7 +78,7 @@ const Outcomes: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <main className="max-w-7xl mx-auto px-6 py-8">
+      <main className="md:max-w-7xl mx-auto  py-8">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Forms & Outcomes</h1>

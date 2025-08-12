@@ -58,4 +58,12 @@ export type SurveyOutcome = {
   data: Record<string, string>;
 };
 
+export interface TableRow {
+  User: string | number;
+  Question: string;
+  Answer: string;
+  Status: string;
+}
+
+
 

@@ -9,7 +9,7 @@ export const surveyOutcomesAtom = atom<SurveyOutcome[]>([]);
 export const fetchSurveyOutcomesAtom = atom(
   null,
   async (get, set, { surveyId, onDone, onError }: { 
-    surveyId: number; 
+    surveyId: number | string; 
     onDone?: (outcomes: SurveyOutcome[]) => void; 
     onError?: () => void; 
   }) => {

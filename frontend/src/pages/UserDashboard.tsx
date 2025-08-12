@@ -1,4 +1,5 @@
 import Header from "../components/UserDashboard/Header";
+import Footer from '../components/ui/Footer'
 import { Outlet } from "react-router-dom";
 
 
@@ -14,8 +15,8 @@ const UserDashboard: React.FC = () => {
       {/* Main Content */}
       <main className="px-4 sm:px-6 lg:px-8 py-20 max-w-6xl mx-auto">
         <Outlet />
-        
       </main>
+      <Footer/>
     </div>
   );
 };

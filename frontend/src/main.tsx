@@ -14,7 +14,7 @@ import SurveyPage from "./components/UserDashboard/subpages/surveys";
 import TakeSurvey from "./components/UserDashboard/subpages/take-survey";
 import IndexPage from "./components/Dashboard/subpages/index";
 import Outcomes from "./components/Dashboard/subpages/forms-and-outcomes";
-//import Reports from "./components/Dashboard/subpages/reports";
+import Reports from "./components/Dashboard/subpages/reports";
 import PreviewPage from "./components/Dashboard/subpages/PreviewPage";
 import ErrorPage from "./extra/ErrorPage";
 import NotFoundPage from "./extra/NotFound";
@@ -25,7 +25,7 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: <LoginForm />,
-    errorElement: <ErrorPage />, 
+    errorElement: <ErrorPage />,
   },
   {
     path: "/signup",
@@ -68,7 +68,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <IndexPage /> },
       { path: "forms-and-outcomes", element: <Outcomes /> },
-      //{ path: "reports", element: <Reports /> },
+      { path: "reports", element: <Reports /> },
       { path: "preview", element: <PreviewPage /> },
     ],
   },
