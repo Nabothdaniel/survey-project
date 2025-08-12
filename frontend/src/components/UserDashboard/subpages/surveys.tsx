@@ -3,6 +3,7 @@ import { FiCheckCircle } from "react-icons/fi";
 import { useSurveyStats } from "../../../hooks/useSurveyStats";
 import { useSetAtom } from "jotai";
 import { fetchSurveysAtom } from "../../../atoms/surveyAtom";
+import { Link } from "react-router-dom";
 
 type SurveyStatus = "new" | "in_progress" | "completed";
 
@@ -14,6 +15,9 @@ const SurveyPage: React.FC = () => {
     surveyData,
     surveyStatusMap,
     setSurveyStatusMap,
+    updateSurveyStatus,
+    formatStatus,
+    getStatusColor,
     getStatus,
   } = useSurveyStats();
 
@@ -106,36 +110,47 @@ const SurveyPage: React.FC = () => {
             </h2>
           </div>
           <div className="divide-y divide-gray-200">
-            {activeSurveys.map((s) => {
-              const state: SurveyStatus = getStatus(s.id);
+            {activeSurveys.map((survey) => {
+              const status: SurveyStatus = getStatus(survey.id);
               return (
-                <div
-                  key={s.id}
-                  className="p-4 sm:p-6 flex justify-between items-start hover:bg-gray-50 transition-colors"
-                >
-                  <div>
-                    <h3 className="text-lg font-medium text-gray-900">{s.title}</h3>
-                    <p className="text-sm text-gray-500 mt-1">{s.description}</p>
-  
-                  </div>
-                  <button
-                    onClick={() => {
-                      setSelectedSurveyId(Number(s.id));
-                      setSubmitted(false);
-                    }}
-                    disabled={state === "completed"}
-                    className={`px-4 py-2 text-sm font-medium rounded-lg ${state === "new"
-                        ? "bg-blue-600 text-white hover:bg-blue-700"
-                        : state === "in_progress"
-                          ? "bg-yellow-500 text-white hover:bg-yellow-600"
-                          : "bg-gray-300 text-gray-600 cursor-not-allowed"
-                      }`}
-                  >
-                    {state === "new" && "Start Survey"}
-                    {state === "in_progress" && "Continue"}
-                    {state === "completed" && "Completed"}
-                  </button>
-                </div>
+                                                        <div
+                                            key={survey.id}
+                                            className="p-4 sm:p-6 hover:bg-gray-50 transition-colors"
+                                        >
+                                            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                                                <div className="flex-1">
+                                                    <div className="flex flex-wrap items-center gap-2 mb-2">
+                                                        <h3 className="text-lg font-medium text-gray-900">
+                                                            {survey.title}
+                                                        </h3>
+                                                        <span
+                                                            className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(status)}`}
+                                                        >
+                                                            {formatStatus(status)}
+                                                        </span>
+                                                    </div>
+                                                    <p className="text-sm text-gray-500">{survey.description}</p>
+
+                                                </div>
+                                                <Link
+                                                    to={`/take-survey/${survey.id}`}
+                                                    onClick={() => {
+                                                        if (status === "new") {
+                                                            updateSurveyStatus(survey.id, "in_progress");
+                                                        }
+                                                    }}
+                                                    className={`px-4 py-2 text-sm text-center font-medium rounded-lg whitespace-nowrap ${status === "completed"
+                                                            ? "bg-gray-100 text-gray-700 cursor-not-allowed pointer-events-none"
+                                                            : "bg-blue-600 text-white hover:bg-blue-700"
+                                                        }`}
+                                                >
+                                                    {status === "new" && "Start Survey"}
+                                                    {status === "in_progress" && "Continue"}
+                                                    {status === "completed" && "Completed"}
+                                                </Link>
+
+                                            </div>
+                                        </div>
               );
             })}
           </div>
