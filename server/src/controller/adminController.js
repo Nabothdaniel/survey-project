@@ -207,24 +207,30 @@ const getSurveyOutcomes = async (req, res) => {
       return res.status(404).json({ success: false, message: "Survey not found" });
     }
 
-    const totalSurveyResponses = survey.questions.reduce(
-      (sum, q) => sum + q.responses.length,
-      0
-    );
+    // Count unique respondents across all questions
+    const uniqueRespondentIds = new Set();
+    survey.questions.forEach(q => {
+      q.responses.forEach(r => uniqueRespondentIds.add(r.respondent.id));
+    });
+
+    const totalUniqueResponses = uniqueRespondentIds.size;
 
     const outcomeData = survey.questions.map(question => {
       const totalResponses = question.responses.length;
       const answerCount = {};
 
       question.responses.forEach(r => {
-        const ans = r.answer?.toLowerCase() || "no answer";
+        const ans =
+          r.answer && typeof r.answer === "string"
+            ? r.answer.trim()
+            : "No Answer";
         answerCount[ans] = (answerCount[ans] || 0) + 1;
       });
 
       const percentages = Object.keys(answerCount).map(ans => ({
         answer: ans,
         count: answerCount[ans],
-        percentage: ((answerCount[ans] / totalSurveyResponses) * 100).toFixed(2)
+        percentage: ((answerCount[ans] / totalResponses) * 100).toFixed(2)
       }));
 
       return {
@@ -249,7 +255,8 @@ const getSurveyOutcomes = async (req, res) => {
           email: survey.creator.email
         }
       },
-      totalSurveyResponses,
+      totalSurveyResponses: totalUniqueResponses, 
+      totalFields: survey.questions.length,       
       questions: outcomeData
     });
 
