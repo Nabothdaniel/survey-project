@@ -11,11 +11,8 @@ import './src/models/index.js';
 dotenv.config();
 
 
-
 const app = express()
 const PORT = process.env.PORT || 9000
-
-
 
 
 // Middleware

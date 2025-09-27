@@ -10,17 +10,13 @@ import SurveyUserStatus from './SurveyUserStatus.js';
 // associations
 // ======================
 
-// User → Survey
+// User → Survey (creator)
 User.hasMany(Survey, { foreignKey: "createdBy", as: "surveys" });
 Survey.belongsTo(User, { foreignKey: "createdBy", as: "creator" });
 
 // Survey → Question
 Survey.hasMany(Question, { foreignKey: "surveyId", as: "questions", onDelete: "CASCADE" });
 Question.belongsTo(Survey, { foreignKey: "surveyId", as: "survey" });
-
-// Survey → Response
-Survey.hasMany(Response, { foreignKey: "surveyId", as: "surveyResponses", onDelete: "CASCADE" });
-Response.belongsTo(Survey, { foreignKey: "surveyId", as: "survey" });
 
 // Question → Response
 Question.hasMany(Response, { foreignKey: "questionId", as: "responses", onDelete: "CASCADE" });
