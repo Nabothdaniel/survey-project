@@ -18,12 +18,16 @@ Survey.belongsTo(User, { foreignKey: "createdBy", as: "creator" });
 Survey.hasMany(Question, { foreignKey: "surveyId", as: "questions", onDelete: "CASCADE" });
 Question.belongsTo(Survey, { foreignKey: "surveyId", as: "survey" });
 
+// Survey → Response
+Survey.hasMany(Response, { foreignKey: "surveyId", as: "responses", onDelete: "CASCADE" });
+Response.belongsTo(Survey, { foreignKey: "surveyId", as: "survey" });
+
 // Question → Response
 Question.hasMany(Response, { foreignKey: "questionId", as: "responses", onDelete: "CASCADE" });
 Response.belongsTo(Question, { foreignKey: "questionId", as: "question" });
 
 // User → Response (the respondent)
-User.hasMany(Response, { foreignKey: "userId", as: "userResponses", onDelete: "CASCADE" });
+User.hasMany(Response, { foreignKey: "userId", as: "responses", onDelete: "CASCADE" });
 Response.belongsTo(User, { foreignKey: "userId", as: "respondent" });
 
 // ======================
@@ -42,3 +46,4 @@ const models = { User, Survey, Question, Response, SurveyUserStatus };
 
 export { sequelize };
 export default models;
+

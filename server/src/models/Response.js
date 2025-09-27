@@ -12,10 +12,6 @@ const Response = sequelize.define("Response", {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  surveyId: {
-    type: DataTypes.UUID,
-    allowNull: false,
-  },
   questionId: {
     type: DataTypes.UUID,
     allowNull: false,
@@ -30,11 +26,9 @@ const Response = sequelize.define("Response", {
   indexes: [
     {
       unique: true,
-      fields: ['surveyId', 'questionId', 'userId']
+      fields: ['questionId', 'userId'] 
     }
   ]
 });
-
-
 
 export default Response;
