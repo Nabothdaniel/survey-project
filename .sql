@@ -1,4 +1,3 @@
-```sql
 -- Drop tables if they exist (to avoid conflicts when re-running)
 DROP TABLE IF EXISTS `responses`;
 DROP TABLE IF EXISTS `survey_user_status`;
@@ -10,7 +9,7 @@ DROP TABLE IF EXISTS `users`;
 -- Users
 -- ========================
 CREATE TABLE `users` (
-  `id` CHAR(36) NOT NULL,
+  `id` VARCHAR(36) NOT NULL,
   `name` VARCHAR(255),
   `email` VARCHAR(255) NOT NULL UNIQUE,
   `password` VARCHAR(255),
@@ -24,10 +23,10 @@ CREATE TABLE `users` (
 -- Surveys
 -- ========================
 CREATE TABLE `surveys` (
-  `id` CHAR(36) NOT NULL,
+  `id` VARCHAR(36) NOT NULL,
   `title` VARCHAR(255) NOT NULL,
   `description` TEXT,
-  `createdBy` CHAR(36) NOT NULL,
+  `createdBy` VARCHAR(36) NOT NULL,
   `createdAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updatedAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -40,11 +39,11 @@ CREATE TABLE `surveys` (
 -- Questions
 -- ========================
 CREATE TABLE `questions` (
-  `id` CHAR(36) NOT NULL,
+  `id` VARCHAR(36) NOT NULL,
   `text` VARCHAR(255) NOT NULL,
   `type` ENUM('text', 'multiple-choice', 'checkbox', 'rating', 'boolean') NOT NULL,
   `options` JSON NULL,
-  `surveyId` CHAR(36) NOT NULL,
+  `surveyId` VARCHAR(36) NOT NULL,
   `createdAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updatedAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -57,11 +56,11 @@ CREATE TABLE `questions` (
 -- Responses
 -- ========================
 CREATE TABLE `responses` (
-  `id` CHAR(36) NOT NULL,
+  `id` VARCHAR(36) NOT NULL,
   `answer` VARCHAR(255) NOT NULL,
-  `questionId` CHAR(36) NOT NULL,
-  `surveyId` CHAR(36) NOT NULL,
-  `userId` CHAR(36) NOT NULL,
+  `questionId` VARCHAR(36) NOT NULL,
+  `surveyId` VARCHAR(36) NOT NULL,
+  `userId` VARCHAR(36) NOT NULL,
   `createdAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updatedAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -82,9 +81,9 @@ CREATE TABLE `responses` (
 -- Survey User Status
 -- ========================
 CREATE TABLE `survey_user_status` (
-  `id` CHAR(36) NOT NULL,
-  `userId` CHAR(36) NOT NULL,
-  `surveyId` CHAR(36) NOT NULL,
+  `id` VARCHAR(36) NOT NULL,
+  `userId` VARCHAR(36) NOT NULL,
+  `surveyId` VARCHAR(36) NOT NULL,
   `status` ENUM('new', 'in_progress', 'completed') NOT NULL DEFAULT 'new',
   `answers` JSON NULL,
   `createdAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -135,4 +134,3 @@ INSERT INTO `survey_user_status` (`id`, `userId`, `surveyId`, `status`, `answers
 VALUES 
   ('sus1', 'u2', 's1', 'completed', JSON_OBJECT('q1', '5', 'q2', 'yes')),
   ('sus2', 'u3', 's2', 'in_progress', JSON_OBJECT('q3', 'Feature A'));
-```
